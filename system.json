@@ -8,7 +8,7 @@
       "discord": "miirflin"
     }
   ],
-  "url": "",
+  "url": "https://github.com/Mirflin/dogmaliter-foundryvtt",
   "license": "LICENSE.txt",
   "readme": "README.md",
   "bugs": "",
@@ -46,8 +46,8 @@
   "packs": [],
   "packFolders": [],
   "socket": false,
-  "manifest": "Replace this with a link to the /latest release system.json so people can receive updates after they've installed the system",
-  "download": "This must link to a .zip file of the current version",
+  "manifest": "https://github.com/Mirflin/dogmaliter-foundryvtt/blob/main/system.json",
+  "download": "",
   "background": "systems/dogmaliter/assets/system-icon.png",
   "gridDistance": 1.5,
   "gridUnits": "m",
