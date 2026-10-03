@@ -1,0 +1,56 @@
+{
+  "id": "dogmaliter",
+  "title": "DogmaLiter",
+  "description": "The DogmaLiter system for FoundryVTT!",
+  "authors": [
+    {
+      "name": "Miirflin",
+      "discord": "miirflin"
+    }
+  ],
+  "url": "",
+  "license": "LICENSE.txt",
+  "readme": "README.md",
+  "bugs": "",
+  "changelog": "CHANGELOG.md",
+  "media": [
+    {
+      "type": "setup",
+      "url": "systems/dogmaliter/assets/system-icon.png",
+      "thumbnail": "systems/dogmaliter/assets/system-icon.png"
+    }
+  ],
+  "version": "0.2",
+  "compatibility": {
+    "minimum": 12,
+    "verified": "14"
+  },
+  "esmodules": [
+    "module/dogmaliter.mjs"
+  ],
+  "styles": [
+    "css/dogmaliter.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "path": "lang/ru.json"
+    }
+  ],
+  "packs": [],
+  "packFolders": [],
+  "socket": false,
+  "manifest": "Replace this with a link to the /latest release system.json so people can receive updates after they've installed the system",
+  "download": "This must link to a .zip file of the current version",
+  "background": "systems/dogmaliter/assets/system-icon.png",
+  "gridDistance": 1.5,
+  "gridUnits": "m",
+  "primaryTokenAttribute": "health",
+  "secondaryTokenAttribute": "power"
+}

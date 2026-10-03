@@ -1,0 +1,162 @@
+{{!-- Roll20-style actor sheet: module/sheets/actor-sheet.mjs. Pages: Main, Attributes, Inventory.
+      Every field saves itself on change; there is no save button. --}}
+<form class="{{cssClass}} r20 flexcol" autocomplete="off">
+
+  <header class="r20-header">
+    <input class="r20-name" name="name" type="text" value="{{actor.name}}"
+           placeholder="{{localize 'DOGMALITER.Sheet.NamePlaceholder'}}" spellcheck="false"/>
+  </header>
+
+  <nav class="sheet-tabs tabs r20-tabs" data-group="primary">
+    <a class="item" data-tab="main">{{localize 'DOGMALITER.Sheet.TabMain'}}</a>
+    <a class="item" data-tab="attributes">{{localize 'DOGMALITER.Sheet.TabAttributes'}}</a>
+    <a class="item" data-tab="inventory">{{localize 'DOGMALITER.Sheet.TabInventory'}}</a>
+  </nav>
+
+  <section class="sheet-body r20-body">
+
+    {{!-- Main: portrait, token, description --}}
+    <div class="tab r20-main" data-group="primary" data-tab="main">
+      <div class="r20-images">
+        {{!-- Each slot: the picture (click to change, x to remove), or, with
+              none yet, a dashed empty slot with a "+" that opens the picker. --}}
+        <figure class="r20-image">
+          <figcaption class="r20-label">{{localize 'DOGMALITER.Sheet.Portrait'}}</figcaption>
+          {{#if portrait}}
+            <div class="r20-image-frame">
+              <img src="{{portrait}}" data-edit="img" alt="{{localize 'DOGMALITER.Sheet.Portrait'}}"
+                   {{#if editable}}title="{{localize 'DOGMALITER.Sheet.ClickToChange'}}"{{/if}}/>
+              {{#if editable}}
+                <button type="button" class="r20-image-remove" data-action="image-remove" data-field="img"
+                        title="{{localize 'DOGMALITER.Sheet.RemoveImage'}}"
+                        aria-label="{{localize 'DOGMALITER.Sheet.RemoveImage'}}"><i class="fas fa-xmark"></i></button>
+              {{/if}}
+            </div>
+            {{#if editable}}<p class="r20-hint">{{localize 'DOGMALITER.Sheet.ClickToChange'}}</p>{{/if}}
+          {{else if editable}}
+            <button type="button" class="r20-image-empty" data-action="image-pick" data-field="img"
+                    title="{{localize 'DOGMALITER.Sheet.AddPortrait'}}"
+                    aria-label="{{localize 'DOGMALITER.Sheet.AddPortrait'}}"><i class="fas fa-plus"></i></button>
+            <p class="r20-hint">{{localize 'DOGMALITER.Sheet.AddPortrait'}}</p>
+          {{else}}
+            <div class="r20-image-empty is-static"></div>
+          {{/if}}
+        </figure>
+
+        <figure class="r20-image">
+          <figcaption class="r20-label">{{localize 'DOGMALITER.Sheet.Token'}}</figcaption>
+          {{#if token}}
+            <div class="r20-image-frame r20-image-frame--token">
+              <img src="{{token}}" data-edit="prototypeToken.texture.src" alt="{{localize 'DOGMALITER.Sheet.Token'}}"
+                   {{#if editable}}title="{{localize 'DOGMALITER.Sheet.ClickToChange'}}"{{/if}}/>
+              {{#if editable}}
+                <button type="button" class="r20-image-remove" data-action="image-remove" data-field="prototypeToken.texture.src"
+                        title="{{localize 'DOGMALITER.Sheet.RemoveImage'}}"
+                        aria-label="{{localize 'DOGMALITER.Sheet.RemoveImage'}}"><i class="fas fa-xmark"></i></button>
+              {{/if}}
+            </div>
+          {{else if editable}}
+            <button type="button" class="r20-image-empty r20-image-empty--token" data-action="image-pick"
+                    data-field="prototypeToken.texture.src"
+                    title="{{localize 'DOGMALITER.Sheet.AddToken'}}"
+                    aria-label="{{localize 'DOGMALITER.Sheet.AddToken'}}"><i class="fas fa-plus"></i></button>
+            <p class="r20-hint">{{localize 'DOGMALITER.Sheet.AddToken'}}</p>
+          {{else}}
+            <div class="r20-image-empty r20-image-empty--token is-static"></div>
+          {{/if}}
+          {{#if editable}}{{#if portrait}}
+            <button type="button" class="r20-button r20-button--small" data-action="token-from-portrait">
+              {{localize 'DOGMALITER.Sheet.UsePortrait'}}
+            </button>
+          {{/if}}{{/if}}
+        </figure>
+      </div>
+
+      <div class="r20-description">
+        <p class="r20-label">{{localize 'DOGMALITER.Sheet.Description'}}
+          {{#if editable}}<span class="r20-label-note">{{localize 'DOGMALITER.Sheet.DescriptionSaveHint'}}</span>{{/if}}
+        </p>
+        {{!-- Foundry's ProseMirror editor, always open (button=false): fonts,
+              sizes, colours, alignment, headings, lists, tables, images. --}}
+        {{editor enrichedDescription target="system.biography" button=false editable=editable engine="prosemirror"}}
+      </div>
+    </div>
+
+    {{!-- Attributes: a list the player builds --}}
+    <div class="tab r20-attributes" data-group="primary" data-tab="attributes">
+      <div class="r20-attr-row r20-attr-headings">
+        <span>{{localize 'DOGMALITER.Sheet.AttributeName'}}</span>
+        <span>{{localize 'DOGMALITER.Sheet.AttributeCurrent'}}</span>
+        <span>{{localize 'DOGMALITER.Sheet.AttributeMax'}}</span>
+        <span title="{{localize 'DOGMALITER.Sheet.InRollsHint'}}">{{localize 'DOGMALITER.Sheet.InRolls'}}</span>
+        <span></span>
+      </div>
+
+      <ol class="r20-attr-list">
+        {{#each attributes as |attr|}}
+          <li class="r20-attr-row" data-attribute-id="{{attr.id}}">
+            <input type="text" name="system.attributes.{{attr.id}}.name" value="{{attr.name}}"
+                   placeholder="{{localize 'DOGMALITER.Sheet.AttributeName'}}" spellcheck="false"/>
+            <input type="text" name="system.attributes.{{attr.id}}.value" value="{{attr.value}}"
+                   placeholder="{{localize 'DOGMALITER.Sheet.AttributeCurrent'}}" data-dtype="String" spellcheck="false"/>
+            <div class="r20-attr-max">
+              <span class="r20-attr-slash" aria-hidden="true">/</span>
+              <input type="text" name="system.attributes.{{attr.id}}.max" value="{{attr.max}}"
+                     placeholder="{{localize 'DOGMALITER.Sheet.AttributeMax'}}" data-dtype="String" spellcheck="false"/>
+            </div>
+            <code class="r20-attr-key" title="{{localize 'DOGMALITER.Sheet.InRollsHint'}}">{{#if attr.key}}@{{attr.key}}{{#if attr.max}}<br/><span>@{{attr.key}}_max</span>{{/if}}{{else}}&mdash;{{/if}}</code>
+            {{#if @root.editable}}
+              <button type="button" class="r20-icon-button" data-action="attribute-delete"
+                      title="{{localize 'DOGMALITER.Sheet.DeleteAttribute'}}"
+                      aria-label="{{localize 'DOGMALITER.Sheet.DeleteAttribute'}}"><i class="fas fa-trash"></i></button>
+            {{else}}<span></span>{{/if}}
+          </li>
+        {{else}}
+          <li class="r20-empty">{{localize 'DOGMALITER.Sheet.NoAttributes'}}</li>
+        {{/each}}
+      </ol>
+
+      {{#if editable}}
+        <button type="button" class="r20-button" data-action="attribute-add">
+          <i class="fas fa-plus"></i> {{localize 'DOGMALITER.Sheet.AddAttribute'}}
+        </button>
+      {{/if}}
+    </div>
+
+    {{!-- Inventory: every item the actor carries --}}
+    <div class="tab r20-inventory" data-group="primary" data-tab="inventory">
+      <div class="r20-inv-row r20-inv-headings">
+        <span></span>
+        <span>{{localize 'DOGMALITER.Sheet.InventoryItem'}}</span>
+        <span>{{localize 'DOGMALITER.Sheet.InventoryQuantity'}}</span>
+        <span></span>
+      </div>
+
+      <ol class="r20-inv-list">
+        {{#each inventory as |item|}}
+          <li class="r20-inv-row" data-item-id="{{item.id}}">
+            <img class="r20-inv-img" src="{{item.img}}" alt="" data-action="item-open"/>
+            <a class="r20-inv-name" data-action="item-open">
+              {{item.name}}
+              <span class="r20-inv-type">{{item.typeLabel}}</span>
+            </a>
+            <span class="r20-inv-qty">{{#if item.hasQuantity}}{{item.quantity}}{{else}}&mdash;{{/if}}</span>
+            <span class="r20-inv-controls">
+              {{#if @root.editable}}
+                <button type="button" class="r20-icon-button r20-icon-button--send" data-action="item-send"
+                        title="{{localize 'DOGMALITER.Sheet.SendItem'}}"
+                        aria-label="{{localize 'DOGMALITER.Sheet.SendItem'}}"><i class="fas fa-paper-plane"></i></button>
+                <button type="button" class="r20-icon-button" data-action="item-delete"
+                        title="{{localize 'DOGMALITER.Sheet.DeleteItem'}}"
+                        aria-label="{{localize 'DOGMALITER.Sheet.DeleteItem'}}"><i class="fas fa-trash"></i></button>
+              {{/if}}
+            </span>
+          </li>
+        {{else}}
+          <li class="r20-empty">{{localize 'DOGMALITER.Sheet.NoItems'}}</li>
+        {{/each}}
+      </ol>
+    </div>
+
+  </section>
+</form>

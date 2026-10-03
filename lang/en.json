@@ -1,0 +1,62 @@
+{
+  "DOGMALITER": {
+    "SheetLabels": {
+      "Actor": "DogmaLiter Actor Sheet",
+      "Item": "DogmaLiter Item Sheet"
+    },
+    "Item": {
+      "Spell": {
+        "SpellLVL": "Level {level} Spells",
+        "AddLVL": "Add LVL {level}"
+      }
+    },
+    "Effect": {
+      "Source": "Source",
+      "Toggle": "Toggle Effect",
+      "Temporary": "Temporary Effects",
+      "Passive": "Passive Effects",
+      "Inactive": "Inactive Effects"
+    },
+    "Sheet": {
+      "NamePlaceholder": "Character name",
+      "TabMain": "Main",
+      "TabAttributes": "Attributes",
+      "Portrait": "Portrait",
+      "Token": "Token",
+      "ClickToChange": "Click to change",
+      "UsePortrait": "Use portrait",
+      "Description": "Description",
+      "AttributeName": "Name",
+      "InRolls": "In rolls",
+      "InRollsHint": "Use it in a roll formula: @Name is the current value, @Name_max the max (1d20 + @Strength). Only Latin letters, digits, _ and - are kept.",
+      "DeleteAttribute": "Delete attribute",
+      "AddAttribute": "Add attribute",
+      "NoAttributes": "No attributes yet. Add the first one below.",
+      "AttributeCurrent": "Current",
+      "AttributeMax": "Max",
+      "DescriptionSaveHint": "Save: Ctrl+S or the disk button in the toolbar",
+      "AddPortrait": "Add portrait",
+      "AddToken": "Add token image",
+      "RemoveImage": "Remove image",
+      "TabInventory": "Inventory",
+      "InventoryItem": "Item",
+      "InventoryQuantity": "Qty",
+      "NoItems": "No items yet.",
+      "SendItem": "Send to inventory",
+      "SendNotConnected": "Sending items to the inventory is not connected yet.",
+      "DeleteItem": "Delete item",
+      "DeleteItemConfirm": "Delete <strong>{name}</strong>? This cannot be undone."
+    }
+  },
+  "TYPES": {
+    "Actor": {
+      "character": "Character",
+      "npc": "NPC"
+    },
+    "Item": {
+      "item": "Item",
+      "feature": "Feature",
+      "spell": "Spell"
+    }
+  }
+}

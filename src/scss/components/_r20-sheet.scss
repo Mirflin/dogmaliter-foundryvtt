@@ -1,0 +1,677 @@
+// Roll20-style actor sheet (templates/actor/actor-sheet.hbs), dark gray with
+// a dark cyan accent.
+//
+// Colours are set explicitly rather than inherited: Foundry's light and dark
+// interface themes would otherwise each restyle the inputs and the editor
+// differently, and the sheet is meant to look the same for everyone.
+
+$r20-bg: #1b1f22; // window ground - dark gray
+$r20-panel: #23292d; // cards, fields
+$r20-panel-2: #2b3338; // toolbar, table headers, hover
+$r20-line: #37424a;
+$r20-text: #dce4e8;
+$r20-muted: #8c9ba4;
+$r20-cyan: #16a3a8; // accent - dark cyan, bright enough to read on gray
+$r20-cyan-deep: #0e7479; // buttons, selections
+$r20-cyan-soft: rgba(22, 163, 168, 0.2);
+$r20-danger: #e06b72;
+
+&.r20-sheet .window-content {
+  padding: 0;
+  background: $r20-bg;
+  color: $r20-text;
+}
+
+.r20 {
+  height: 100%;
+  font-family: $font-primary;
+  color: $r20-text;
+
+  // Padding and border inside the width, or a `width: 100%` field spills
+  // past its column and the attribute rows overlap.
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  input[type='text'] {
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    margin: 0;
+    padding: 6px 8px;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+    font-family: $font-primary;
+    font-size: 14px;
+    box-shadow: none;
+
+    &:focus {
+      border-color: $r20-cyan;
+      outline: 2px solid $r20-cyan-soft;
+      outline-offset: 0;
+    }
+
+    &::placeholder {
+      color: $r20-muted;
+      opacity: 1;
+    }
+
+    &:disabled {
+      background: transparent;
+      border-color: transparent;
+      color: $r20-text;
+    }
+  }
+}
+
+.r20-header {
+  flex: 0 0 auto;
+  padding: 12px 14px 10px;
+  background: $r20-panel;
+  border-bottom: 1px solid $r20-line;
+
+  .r20-name {
+    height: auto;
+    background: transparent;
+    border-color: transparent;
+    font-size: 22px;
+    font-weight: 700;
+
+    &:hover {
+      border-color: $r20-line;
+    }
+  }
+}
+
+.r20-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 14px 0;
+  background: $r20-panel;
+  border-bottom: 1px solid $r20-line;
+
+  .item {
+    flex: 0 0 auto;
+    padding: 7px 14px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    color: $r20-muted;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: none;
+
+    &:hover {
+      color: $r20-text;
+    }
+
+    &.active {
+      margin-bottom: -1px;
+      background: $r20-bg;
+      border-color: $r20-line;
+      box-shadow: inset 0 2px 0 $r20-cyan;
+      color: $r20-cyan;
+    }
+  }
+}
+
+.r20-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px;
+  scrollbar-color: $r20-line $r20-bg;
+}
+
+.r20-label {
+  display: block;
+  margin: 0 0 6px;
+  color: $r20-muted;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.r20-label-note {
+  margin-left: 8px;
+  color: $r20-muted;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.8;
+}
+
+.r20-hint {
+  margin: 4px 0 0;
+  color: $r20-muted;
+  font-size: 11px;
+}
+
+.r20-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  height: auto;
+  margin: 10px 0 0;
+  padding: 6px 12px;
+  background: $r20-cyan-deep;
+  border: 1px solid $r20-cyan;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+
+  &:hover {
+    background: $r20-cyan;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $r20-text;
+    outline-offset: 2px;
+  }
+
+  &--small {
+    margin-top: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+}
+
+// ---- Main page ----
+
+// `display` only on the ACTIVE tab: Foundry hides inactive tabs with its own
+// rule, and in v13+ the system stylesheet sits in a later cascade layer than
+// core, so an unconditional `display: flex` here would beat that rule and
+// show this page under the other one.
+// At least the full height of the sheet body, so the description below can
+// take whatever room the pictures leave; taller content scrolls the body.
+.r20-main {
+  flex-direction: column;
+  gap: 14px;
+  height: auto;
+  min-height: 100%;
+
+  &.active {
+    display: flex;
+  }
+}
+
+.r20-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.r20-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 12px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-radius: 4px;
+
+  .r20-label {
+    align-self: flex-start;
+  }
+
+  img {
+    display: block;
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    background: $r20-bg;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+  }
+
+  img[data-edit] {
+    cursor: pointer;
+
+    &:hover {
+      border-color: $r20-cyan;
+      box-shadow: 0 0 0 2px $r20-cyan-soft;
+    }
+  }
+}
+
+// A picture that is set, with its remove button in the corner.
+.r20-image-frame {
+  position: relative;
+
+  // A token is round on most maps; showing it that way is what makes it read
+  // as "the token" and not a second portrait.
+  &--token img {
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  // On a circle the corner of the box is empty space; pull the button in to
+  // sit on the circle's edge.
+  &--token .r20-image-remove {
+    top: 8px;
+    right: 8px;
+  }
+}
+
+.r20-image-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  background: $r20-panel-2;
+  border: 1px solid $r20-line;
+  border-radius: 50%;
+  color: $r20-muted;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: $r20-danger;
+    border-color: $r20-danger;
+    color: #fff;
+    outline: none;
+  }
+}
+
+// No picture yet: a dashed slot the size of the picture, "+" in the middle.
+.r20-image-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 2px dashed $r20-line;
+  border-radius: 4px;
+  color: $r20-muted;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
+
+  &:hover,
+  &:focus-visible {
+    background: $r20-cyan-soft;
+    border-color: $r20-cyan;
+    color: $r20-cyan;
+    outline: none;
+  }
+
+  &--token {
+    border-radius: 50%;
+  }
+
+  // Seen by someone who cannot edit: just the empty outline, no "+".
+  &.is-static {
+    cursor: default;
+  }
+}
+
+// ---- Description: Foundry's ProseMirror editor, restyled ----
+
+.r20-description {
+  // Fills the rest of the page, growing and shrinking with the window.
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+
+  .editor {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 240px;
+    overflow: hidden;
+    resize: none;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 4px;
+  }
+
+  .editor:focus-within {
+    border-color: $r20-cyan;
+  }
+
+  // The toolbar.
+  .editor menu {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin: 0;
+    padding: 4px;
+    background: $r20-panel-2;
+    border: none;
+    border-bottom: 1px solid $r20-line;
+    border-radius: 0;
+
+    button {
+      color: $r20-text;
+      background: transparent;
+      border: 1px solid transparent;
+
+      &:hover,
+      &.active {
+        background: $r20-cyan-soft;
+        border-color: $r20-cyan-deep;
+        color: #fff;
+      }
+    }
+
+    .pm-dropdown {
+      color: $r20-text;
+      border-color: $r20-line;
+
+      ul {
+        background: $r20-panel-2;
+        border: 1px solid $r20-line;
+        color: $r20-text;
+      }
+
+      li:hover {
+        background: $r20-cyan-soft;
+      }
+    }
+  }
+
+  // The page itself.
+  .editor-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 12px 14px;
+    color: $r20-text;
+    font-family: $font-primary;
+    font-size: 14px;
+    line-height: 1.55;
+
+    &:focus,
+    .ProseMirror:focus {
+      outline: none;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0.8em 0 0.4em;
+      color: $r20-text;
+      border-bottom: none;
+      font-family: $font-primary;
+    }
+
+    a {
+      color: $r20-cyan;
+    }
+
+    blockquote {
+      margin: 0.6em 0;
+      padding: 0.2em 0.9em;
+      background: $r20-bg;
+      border-left: 3px solid $r20-cyan-deep;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid $r20-line;
+    }
+
+    code,
+    pre {
+      background: $r20-bg;
+      color: $r20-text;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border: none;
+    }
+
+    figure {
+      margin: 0.6em 0;
+    }
+
+    figcaption {
+      color: $r20-muted;
+      font-size: 12px;
+    }
+
+    table {
+      width: 100%;
+      margin: 0.6em 0;
+      border-collapse: collapse;
+      background: transparent;
+      border: 1px solid $r20-line;
+    }
+
+    th,
+    td {
+      padding: 5px 8px;
+      border: 1px solid $r20-line;
+      color: $r20-text;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th,
+    thead td {
+      background: $r20-panel-2;
+      font-weight: 700;
+    }
+
+    // ProseMirror marks the cells being selected.
+    .selectedCell {
+      background: $r20-cyan-soft;
+    }
+  }
+}
+
+// ---- Attributes page ----
+
+.r20-attr-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.r20-attr-headings {
+  padding: 0 0 6px;
+  border-bottom: 1px solid $r20-line;
+
+  span {
+    color: $r20-muted;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+.r20-attr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+// "14 / 20": the max sits after a slash, the way Roll20 draws it.
+.r20-attr-max {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.r20-attr-slash {
+  flex: 0 0 auto;
+  color: $r20-muted;
+}
+
+.r20-attr-key {
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  border: none;
+  color: $r20-cyan;
+  font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  span {
+    color: $r20-muted;
+  }
+}
+
+.r20-icon-button {
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: $r20-muted;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $r20-danger;
+    color: $r20-danger;
+    outline: none;
+  }
+}
+
+.r20-empty {
+  padding: 18px 0;
+  color: $r20-muted;
+  font-style: italic;
+  text-align: center;
+}
+
+// ---- Inventory page ----
+
+.r20-inv-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 56px 72px;
+  align-items: center;
+  gap: 10px;
+}
+
+.r20-inv-headings {
+  padding: 0 0 6px;
+  border-bottom: 1px solid $r20-line;
+
+  span {
+    color: $r20-muted;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  span:nth-child(3) {
+    text-align: center;
+  }
+}
+
+.r20-inv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+
+  .r20-inv-row {
+    padding: 4px 6px;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 4px;
+
+    &:hover {
+      background: $r20-panel-2;
+    }
+  }
+}
+
+.r20-inv-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  background: $r20-bg;
+  border: 1px solid $r20-line;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.r20-inv-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  color: $r20-text;
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: $r20-cyan;
+    text-shadow: none;
+  }
+}
+
+.r20-inv-type {
+  color: $r20-muted;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.r20-inv-qty {
+  text-align: center;
+}
+
+.r20-inv-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+// Send is not destructive: cyan on hover rather than red.
+.r20-icon-button--send:hover,
+.r20-icon-button--send:focus-visible {
+  border-color: $r20-cyan;
+  color: $r20-cyan;
+}

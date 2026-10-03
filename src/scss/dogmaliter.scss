@@ -1,0 +1,22 @@
+// Fonts (Roboto for the sheet, plus the editor's Russian + English fonts) are
+// loaded from Google Fonts by module/helpers/fonts.mjs, not imported here.
+
+// Import utilities.
+@import 'utils/typography';
+@import 'utils/colors';
+@import 'utils/mixins';
+@import 'utils/variables';
+
+/* Global styles */
+@import 'global/window';
+@import 'global/grid';
+@import 'global/flex';
+
+/* Styles limited to dogmaliter sheets */
+.dogmaliter {
+  @import 'components/forms';
+  @import 'components/resource';
+  @import 'components/items';
+  @import 'components/effects';
+  @import 'components/r20-sheet';
+}

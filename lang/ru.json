@@ -1,0 +1,62 @@
+{
+  "DOGMALITER": {
+    "SheetLabels": {
+      "Actor": "Лист актёра DogmaLiter",
+      "Item": "Лист предмета DogmaLiter"
+    },
+    "Item": {
+      "Spell": {
+        "SpellLVL": "Заклинания {level} уровня",
+        "AddLVL": "Добавить ур. {level}"
+      }
+    },
+    "Effect": {
+      "Source": "Источник",
+      "Toggle": "Переключить эффект",
+      "Temporary": "Временные эффекты",
+      "Passive": "Постоянные эффекты",
+      "Inactive": "Неактивные эффекты"
+    },
+    "Sheet": {
+      "NamePlaceholder": "Имя персонажа",
+      "TabMain": "Главное",
+      "TabAttributes": "Атрибуты",
+      "Portrait": "Портрет",
+      "Token": "Токен",
+      "ClickToChange": "Нажмите, чтобы изменить",
+      "UsePortrait": "Взять портрет",
+      "Description": "Описание",
+      "AttributeName": "Название",
+      "InRolls": "В бросках",
+      "InRollsHint": "Используйте в формуле броска: @Название — текущее значение, @Название_max — максимум (1d20 + @Strength). Сохраняются только латинские буквы, цифры, _ и -.",
+      "DeleteAttribute": "Удалить атрибут",
+      "AddAttribute": "Добавить атрибут",
+      "NoAttributes": "Атрибутов пока нет. Добавьте первый ниже.",
+      "AttributeCurrent": "Текущее",
+      "AttributeMax": "Макс.",
+      "DescriptionSaveHint": "Сохранить: Ctrl+S или кнопка с диском на панели",
+      "AddPortrait": "Добавить портрет",
+      "AddToken": "Добавить изображение токена",
+      "RemoveImage": "Убрать изображение",
+      "TabInventory": "Инвентарь",
+      "InventoryItem": "Предмет",
+      "InventoryQuantity": "Кол-во",
+      "NoItems": "Предметов пока нет.",
+      "SendItem": "Отправить в инвентарь",
+      "SendNotConnected": "Отправка предметов в инвентарь пока не подключена.",
+      "DeleteItem": "Удалить предмет",
+      "DeleteItemConfirm": "Удалить <strong>{name}</strong>? Это нельзя отменить."
+    }
+  },
+  "TYPES": {
+    "Actor": {
+      "character": "Персонаж",
+      "npc": "НИП"
+    },
+    "Item": {
+      "item": "Предмет",
+      "feature": "Особенность",
+      "spell": "Заклинание"
+    }
+  }
+}
