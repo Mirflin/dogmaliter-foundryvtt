@@ -72,10 +72,90 @@ The editor's Font menu offers 15 families that all have both Cyrillic and Latin:
 
 They load from **Google Fonts** at world start, so they need internet; offline they fall back to the default font. The list is in `module/helpers/fonts.mjs` - add a line there to add a font (pick one that lists Cyrillic on fonts.google.com).
 
-### Where it lives
+## Health, Mana, AP and token bars
+
+Every actor has three resources besides its attributes: **Health**, **Mana** and **AP** (action points) - numbers with a max, in `system.health`, `system.mana`, `system.ap`. They sit under the sheet's header on every page.
+
+- The checkbox by a resource's name switches it on or off for this actor (no mana for a warrior, say). Switched off, it leaves the sheet, the GM panel and the token.
+- Every resource that is on gets its own bar **above the token**, stacked: health, mana, AP. Foundry's own two bars are not drawn, and the token's "display bars" setting is not used.
+- Under each resource, two selects - per character: who sees the bar (nobody / owner and GM / everyone) and who sees the number "current / max" on it (the same three). New actors: owner and GM for both. Players never see anything of a token the GM has hidden.
+- The token HUD still edits the resources on the token's bar 1 / bar 2 (health and mana for new actors; change them in the token configuration).
+- In rolls: `@health.value`, `@mana.max`, `@ap.value`.
+
+Worlds from before this had `system.power`: the GM's client moves it into `system.mana` once, and every token bar that showed `power` shows `mana`.
+
+## Attributes of new actors
+
+A new character or NPC starts with the attributes of a list the GM edits on the panel - out of the box: Сила, Ловкость, Интеллект, Выносливость, Заметность, the attack types, Класс брони, Очки движения, Время путешествия, Регенерация, Шанс крита (20) (Players -> "Attributes of new actors"). "Add the missing ones to everyone" gives every existing actor those it lacks, by name, without changing the ones it has. A copied or imported actor keeps its own attributes. The list the system starts with is in `CONFIG.DOGMALITER.defaultAttributes` (`module/helpers/config.mjs`).
+
+## Stat check
+
+The "throw_stat" macro, built in. The **Roll** button in the actor sheet's header opens it for that actor; in a macro, `game.dogmaliter.rollStat()` opens it for the selected token (or your own character).
+
+- Pick a stat and its multiplier: `floor(((multiplier + d20) / 10) * stat)`.
+- Tick **Attack** for an attack: pick the attack type and the hit multiplier. A second d20 + the hit multiplier sets the distance: 13+ middle, 10+ near, below that a miss.
+- **Фехтование** crits when the stat d20 reaches the actor's **Шанс крита**: the result is doubled and the threshold goes back to 20. Every fencing attack that does not crit lowers it by 1, down to 13. Any other attack puts it back to 20.
+- The attack types, the attributes left out of the list, the crit attribute and the numbers are in `CONFIG.DOGMALITER.statRoll` (`module/helpers/config.mjs`).
+
+A character with no attack attributes can still roll a stat (the macro refused); "Attack" is then greyed out.
+
+## GM panel
+
+The sliders button in the Token controls (GM only), or a key you assign under Configure Controls -> DogmaLiter.
+
+- **Scene** - a sub-menu instead of one long page:
+  - *Scenes* - every scene, with a search: view it or activate it.
+  - *Controls* - the viewed scene: pause, pull every player here; global illumination, token vision, darkness (slider and Day / Dusk / Night), fog reset, weather.
+  - *Lights*, *Doors*, *Sounds* - every light source, door and ambient sound of the scene, with a search by name or by the region it stands in, "show on map", and on/off (open / close / lock for doors) one by one or all at once. Doors have no names: they are numbered and labelled with the regions they are in. "Open all" leaves locked doors locked.
+- **Players** - each player: online or not, which scene they are looking at (with "pull here" if it is another one), their character's resources, attributes and active effects. Then every other token on the scene, with a show/hide button. What the cards show each GM picks for themselves at the top of the page ("What to show"): which resource bars, and which attributes - every attribute name the list of new actors or any actor has, as switches. Until some are picked, the attributes with a max are shown. Values can be edited in place: `12` sets it, `-3` / `+5` changes it by that much (a resource stays within 0 and its max). Also the list of attributes new actors start with.
+- **Regions** - draw a new region (rectangle, ellipse, polygon: the buttons switch the map to that tool); every region of the scene: rename, recolour, show it on the map (selects it for editing), switch it off, configure, delete, see which tokens are inside. Each region's behaviors: add one of any type (anything but footsteps opens its configuration), switch on/off, configure, delete. Footsteps are set up right in the list: sound, volume, step interval, range.
+- **Sounds** - quick-sound buttons, sound bindings, footstep regions (below).
+
+## Sound bindings
+
+On the panel's Sounds page: "when this happens, play this sound and/or run this macro".
+
+| Event | Narrowed by |
+|---|---|
+| Panel button - a button under "Quick sounds" | its name |
+| Stat check, Rolled a 20, Rolled a 1 | stat |
+| Attack, Attack: missed / near / middle distance, Crit | attack type |
+| Combat starts, Combat ends | - |
+| Turn starts | character |
+| Custom event | its name |
+
+Leave the second field empty for "any". **Who hears**: everyone, only the one who triggered it, or only the GM. The macro gets `trigger`, `values`, `actor`, `token`, `data` (the roll's numbers) and `binding` as variables. If the player who triggered it may not run the macro, the GM's client runs it.
+
+Fire a custom event from any macro:
+
+```js
+game.dogmaliter.fireTrigger('custom', { values: ['Взрыв'] });
+```
+
+Every event also calls the hook `dogmaliter.trigger` with `(trigger, {values, actor, token, data})`.
+
+## Footsteps by region
+
+A Region Behavior: draw a region, open its configuration -> **Behaviors** -> "+" -> **Footsteps**.
+
+- **Sound**: one file, or a pattern with `*` (`sounds/steps/grass-*.ogg`) - each step plays a random matching file, never the same twice in a row. Players may not browse files, so the GM's client looks the pattern up when the behavior is saved; after adding files to the folder, press the refresh button next to the region on the panel.
+- **One step every (spaces)**, **volume**, **heard up to** (scene units; 0 = everywhere), **who hears** (everyone nearby / those who see the token / the owner and the GM), **priority** (where regions overlap).
+- Every client plays the steps itself, following the token's animation, on the Environment volume channel. The volume falls off with the distance to the listener: your selected tokens, else your own tokens; a GM with nothing selected hears every step. Flying, burrowing and teleporting tokens make no sound; players never hear tokens the GM has hidden.
+- The panel's Sounds page lists the scene's footstep regions (on/off each, open the configuration) and has a switch for all of them.
+
+## Where it lives
 
 | File | What |
 |---|---|
+| `module/canvas/token.mjs` | the stacked resource bars above tokens |
+| `module/documents/token.mjs` | no HUD bar for a switched-off resource |
+| `module/helpers/migration.mjs` | one-time data changes (`power` -> `mana`; the new stats in the list of new actors' attributes) |
+| `module/rolls/stat-roll.mjs` | the stat check; `templates/dialogs/stat-roll.hbs`, `templates/chat/stat-roll.hbs` |
+| `module/apps/gm-panel.mjs` | the GM panel; `templates/apps/gm-panel/` |
+| `module/audio/triggers.mjs` | sound bindings and the events that fire them |
+| `module/audio/footsteps.mjs` | the Footsteps region behavior |
+| `module/helpers/settings.mjs` | world settings and the panel's keybinding |
+| `src/scss/components/_gm-panel.scss` | the panel's and the roll dialog's styles |
 | `module/sheets/actor-sheet.mjs` | the sheet class: tabs, add/delete attribute, "Use portrait", the always-open description editor |
 | `templates/actor/actor-sheet.hbs` | the markup of both pages |
 | `module/documents/actor.mjs` | attribute storage (`attributeList`, `addAttribute`, `removeAttribute`) and roll data |

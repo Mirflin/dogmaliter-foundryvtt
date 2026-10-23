@@ -20,7 +20,7 @@
       "thumbnail": "systems/dogmaliter/assets/system-icon.png"
     }
   ],
-  "version": "0.2",
+  "version": "0.3",
   "compatibility": {
     "minimum": 12,
     "verified": "14"
@@ -45,12 +45,17 @@
   ],
   "packs": [],
   "packFolders": [],
-  "socket": false,
+  "documentTypes": {
+    "RegionBehavior": {
+      "footsteps": {}
+    }
+  },
+  "socket": true,
   "manifest": "https://github.com/Mirflin/dogmaliter-foundryvtt/blob/main/system.json",
   "download": "",
   "background": "systems/dogmaliter/assets/system-icon.png",
   "gridDistance": 1.5,
   "gridUnits": "m",
   "primaryTokenAttribute": "health",
-  "secondaryTokenAttribute": "power"
+  "secondaryTokenAttribute": "mana"
 }

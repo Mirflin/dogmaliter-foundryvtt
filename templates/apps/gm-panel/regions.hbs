@@ -1,0 +1,137 @@
+{{!-- GM panel, Regions page: module/apps/gm-panel.mjs. Each region card
+      carries data-region-id, each behavior row data-behavior-id; the controls
+      in them act on that region / behavior. --}}
+<section class="dl-tab {{#if active}}active{{/if}}" data-tab="regions">
+  {{#if hasScene}}
+
+    <div class="dl-card">
+      <h3 class="dl-card-title"><i class="fa-solid fa-pen-ruler" inert></i> {{localize 'DOGMALITER.Panel.RegionNew'}}</h3>
+      <div class="dl-row dl-row--wrap">
+        <button type="button" class="dl-button" data-action="regionTool" data-tool="rectangle">
+          <i class="fa-solid fa-square" inert></i> {{localize 'DOGMALITER.Panel.RegionRectangle'}}
+        </button>
+        <button type="button" class="dl-button" data-action="regionTool" data-tool="ellipse">
+          <i class="fa-solid fa-circle" inert></i> {{localize 'DOGMALITER.Panel.RegionEllipse'}}
+        </button>
+        <button type="button" class="dl-button" data-action="regionTool" data-tool="polygon">
+          <i class="fa-solid fa-draw-polygon" inert></i> {{localize 'DOGMALITER.Panel.RegionPolygon'}}
+        </button>
+        <button type="button" class="dl-button dl-button--quiet" data-action="regionTool" data-tool="select">
+          <i class="fa-solid fa-expand" inert></i> {{localize 'DOGMALITER.Panel.RegionSelect'}}
+        </button>
+      </div>
+      <p class="dl-hint">{{localize 'DOGMALITER.Panel.RegionDrawHint'}}</p>
+    </div>
+
+    <h3 class="dl-section-title">
+      <i class="fa-solid fa-draw-polygon" inert></i> {{localize 'DOGMALITER.Panel.Regions'}}
+      <span class="dl-count">{{regions.length}}</span>
+    </h3>
+
+    {{#each regions as |region|}}
+      <article class="dl-card dl-region {{#unless region.active}}is-off{{/unless}}" data-region-id="{{region.id}}"
+               style="--dl-region-color: {{region.color}}">
+        <header class="dl-row">
+          <input type="color" class="dl-color" value="{{region.color}}" data-change="regionColor"
+                 aria-label="{{localize 'DOGMALITER.Panel.RegionColor'}}" data-tooltip="{{localize 'DOGMALITER.Panel.RegionColor'}}"/>
+          <input type="text" class="dl-grow dl-region-name" value="{{region.name}}" data-change="regionName" spellcheck="false"
+                 aria-label="{{localize 'DOGMALITER.Panel.RegionName'}}"/>
+          <button type="button" class="dl-icon-button" data-action="regionPan"
+                  data-tooltip="{{localize 'DOGMALITER.Panel.ShowOnMap'}}" aria-label="{{localize 'DOGMALITER.Panel.ShowOnMap'}}">
+            <i class="fa-solid fa-location-crosshairs" inert></i>
+          </button>
+          <button type="button" class="dl-icon-button" data-action="regionOpen"
+                  data-tooltip="{{localize 'DOGMALITER.Panel.Configure'}}" aria-label="{{localize 'DOGMALITER.Panel.Configure'}}">
+            <i class="fa-solid fa-gear" inert></i>
+          </button>
+          <button type="button" class="dl-icon-button dl-icon-button--danger" data-action="regionDelete"
+                  data-tooltip="{{localize 'DOGMALITER.Panel.RegionDelete'}}" aria-label="{{localize 'DOGMALITER.Panel.RegionDelete'}}">
+            <i class="fa-solid fa-trash" inert></i>
+          </button>
+          {{#if region.canHide}}
+            <button type="button" class="dl-toggle dl-toggle--bare {{#if region.active}}is-on{{/if}}" data-action="regionActive"
+                    aria-pressed="{{region.active}}" aria-label="{{localize 'DOGMALITER.Panel.RegionActive'}}"
+                    data-tooltip="{{localize 'DOGMALITER.Panel.RegionActive'}}">
+              <span class="dl-switch" aria-hidden="true"></span>
+            </button>
+          {{/if}}
+        </header>
+
+        {{#if region.tokens}}
+          <p class="dl-hint"><i class="fa-solid fa-user" inert></i> {{localize 'DOGMALITER.Panel.RegionTokens'}}: {{region.tokens}}</p>
+        {{/if}}
+
+        <ol class="dl-list dl-behaviors">
+          {{#each region.behaviors as |behavior|}}
+            <li class="dl-behavior {{#unless behavior.on}}is-off{{/unless}}" data-behavior-id="{{behavior.id}}">
+              <div class="dl-row">
+                <i class="{{behavior.icon}} dl-behavior-icon" inert></i>
+                <span class="dl-grow">{{behavior.name}} {{#if (ne behavior.name behavior.label)}}<span class="dl-muted">{{behavior.label}}</span>{{/if}}</span>
+                <button type="button" class="dl-icon-button" data-action="behaviorOpen"
+                        data-tooltip="{{localize 'DOGMALITER.Panel.Configure'}}" aria-label="{{localize 'DOGMALITER.Panel.Configure'}}">
+                  <i class="fa-solid fa-gear" inert></i>
+                </button>
+                <button type="button" class="dl-icon-button dl-icon-button--danger" data-action="behaviorDelete"
+                        data-tooltip="{{localize 'DOGMALITER.Panel.BehaviorDelete'}}" aria-label="{{localize 'DOGMALITER.Panel.BehaviorDelete'}}">
+                  <i class="fa-solid fa-trash" inert></i>
+                </button>
+                <button type="button" class="dl-toggle dl-toggle--bare {{#if behavior.on}}is-on{{/if}}" data-action="behaviorToggle"
+                        aria-pressed="{{behavior.on}}" aria-label="{{behavior.name}}">
+                  <span class="dl-switch" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              {{!-- Footsteps are set up right here, without opening the configuration. --}}
+              {{#if behavior.footsteps}}
+                <div class="dl-footsteps-fields">
+                  <div class="dl-row">
+                    <input type="text" class="dl-grow" value="{{behavior.footsteps.src}}" data-change="behaviorField" data-field="system.src"
+                           spellcheck="false" placeholder="{{localize 'DOGMALITER.Footsteps.FIELDS.src.label'}}"
+                           aria-label="{{localize 'DOGMALITER.Footsteps.FIELDS.src.label'}}"/>
+                    <button type="button" class="dl-icon-button" data-action="behaviorPick"
+                            data-tooltip="{{localize 'DOGMALITER.Panel.PickFile'}}" aria-label="{{localize 'DOGMALITER.Panel.PickFile'}}">
+                      <i class="fa-solid fa-file-audio" inert></i>
+                    </button>
+                  </div>
+                  <div class="dl-row dl-row--wrap">
+                    <label class="dl-field">
+                      <span>{{localize 'DOGMALITER.Footsteps.FIELDS.volume.label'}}</span>
+                      <input type="range" min="0" max="1" step="0.05" value="{{behavior.footsteps.volume}}"
+                             data-change="behaviorField" data-field="system.volume"/>
+                    </label>
+                    <label class="dl-field">
+                      <span>{{localize 'DOGMALITER.Footsteps.FIELDS.interval.label'}}</span>
+                      <input type="number" min="0.25" max="3" step="0.25" value="{{behavior.footsteps.interval}}"
+                             data-change="behaviorField" data-field="system.interval"/>
+                    </label>
+                    <label class="dl-field">
+                      <span>{{localize 'DOGMALITER.Footsteps.FIELDS.radius.label'}}</span>
+                      <input type="number" min="0" step="1" value="{{behavior.footsteps.radius}}"
+                             data-change="behaviorField" data-field="system.radius"/>
+                    </label>
+                  </div>
+                </div>
+              {{/if}}
+            </li>
+          {{else}}
+            <li class="dl-empty">{{localize 'DOGMALITER.Panel.NoBehaviors'}}</li>
+          {{/each}}
+        </ol>
+
+        <div class="dl-row">
+          <select class="dl-grow" aria-label="{{localize 'DOGMALITER.Panel.BehaviorType'}}">
+            {{selectOptions @root.behaviorTypes}}
+          </select>
+          <button type="button" class="dl-button dl-button--small" data-action="behaviorAdd">
+            <i class="fa-solid fa-plus" inert></i> {{localize 'DOGMALITER.Panel.BehaviorAdd'}}
+          </button>
+        </div>
+      </article>
+    {{else}}
+      <p class="dl-empty">{{localize 'DOGMALITER.Panel.NoRegions'}}</p>
+    {{/each}}
+
+  {{else}}
+    <p class="dl-empty">{{localize 'DOGMALITER.Panel.NoScene'}}</p>
+  {{/if}}
+</section>

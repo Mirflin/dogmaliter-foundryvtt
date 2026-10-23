@@ -1,0 +1,127 @@
+{{!-- GM panel, Players page: module/apps/gm-panel.mjs. A card carries
+      data-actor-uuid (a player's character) or data-token-uuid (a token on the
+      scene); its buttons and fields act on that actor. --}}
+<section class="dl-tab {{#if active}}active{{/if}}" data-tab="players">
+
+  {{!-- What each card below shows: this GM's own choice (the panelView setting). --}}
+  <details class="dl-card dl-view" data-sync="view" open>
+    <summary class="dl-card-title"><i class="fa-solid fa-eye" inert></i> {{localize 'DOGMALITER.Panel.View'}}</summary>
+    <div class="dl-view-group">
+      <span class="dl-label">{{localize 'DOGMALITER.Panel.ViewBars'}}</span>
+      <div class="dl-chips">
+        {{#each viewResources as |res|}}
+          <label class="dl-chip" style="--dl-chip-color: {{res.color}}">
+            <input type="checkbox" data-change="panelView" data-view-resource="{{res.key}}" {{checked res.checked}}/>
+            <span>{{localize res.label}}</span>
+          </label>
+        {{/each}}
+      </div>
+    </div>
+    <div class="dl-view-group">
+      <span class="dl-label">
+        {{localize 'DOGMALITER.Panel.ViewAttributes'}}
+        <span class="dl-title-actions">
+          <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="viewAttributes" data-all="1">{{localize 'DOGMALITER.Panel.ViewAll'}}</button>
+          <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="viewAttributes" data-all="0">{{localize 'DOGMALITER.Panel.ViewNone'}}</button>
+        </span>
+      </span>
+      <div class="dl-chips">
+        {{#each viewAttributes as |attr|}}
+          <label class="dl-chip">
+            <input type="checkbox" data-change="panelView" data-view-attribute="{{attr.name}}" {{checked attr.checked}}/>
+            <span>{{attr.name}}</span>
+          </label>
+        {{else}}
+          <span class="dl-muted">{{localize 'DOGMALITER.Panel.NoShownAttributes'}}</span>
+        {{/each}}
+      </div>
+      {{#if viewAuto}}<p class="dl-hint">{{localize 'DOGMALITER.Panel.ViewAutoHint'}}</p>{{/if}}
+    </div>
+    <p class="dl-hint">{{localize 'DOGMALITER.Panel.AttributeEditHint'}}</p>
+  </details>
+
+  {{!-- The attributes every new actor starts with (the defaultAttributes setting). --}}
+  <details class="dl-card dl-template" data-sync="template">
+    <summary class="dl-card-title"><i class="fa-solid fa-list-check" inert></i> {{localize 'DOGMALITER.Panel.Template'}}
+      <span class="dl-count">{{defaultAttributes.length}}</span></summary>
+    <p class="dl-hint">{{localize 'DOGMALITER.Panel.TemplateHint'}}</p>
+    <div class="dl-template-row dl-template-head">
+      <span>{{localize 'DOGMALITER.Sheet.AttributeName'}}</span>
+      <span>{{localize 'DOGMALITER.Sheet.AttributeCurrent'}}</span>
+      <span>{{localize 'DOGMALITER.Sheet.AttributeMax'}}</span>
+      <span></span>
+    </div>
+    {{#each defaultAttributes as |attr|}}
+      <div class="dl-template-row" data-index="{{@index}}">
+        <input type="text" name="name" value="{{attr.name}}" data-change="template" spellcheck="false"
+               aria-label="{{localize 'DOGMALITER.Sheet.AttributeName'}}"/>
+        <input type="text" name="value" value="{{attr.value}}" data-change="template" spellcheck="false"
+               aria-label="{{localize 'DOGMALITER.Sheet.AttributeCurrent'}}"/>
+        <input type="text" name="max" value="{{attr.max}}" data-change="template" spellcheck="false"
+               aria-label="{{localize 'DOGMALITER.Sheet.AttributeMax'}}"/>
+        <button type="button" class="dl-icon-button dl-icon-button--danger" data-action="templateDelete"
+                data-tooltip="{{localize 'DOGMALITER.Sheet.DeleteAttribute'}}" aria-label="{{localize 'DOGMALITER.Sheet.DeleteAttribute'}}">
+          <i class="fa-solid fa-trash" inert></i>
+        </button>
+      </div>
+    {{/each}}
+    <div class="dl-row dl-row--wrap">
+      <button type="button" class="dl-button dl-button--small" data-action="templateAdd">
+        <i class="fa-solid fa-plus" inert></i> {{localize 'DOGMALITER.Sheet.AddAttribute'}}
+      </button>
+      <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="templateApply">
+        <i class="fa-solid fa-users-gear" inert></i> {{localize 'DOGMALITER.Panel.TemplateApply'}}
+      </button>
+    </div>
+  </details>
+
+  <h3 class="dl-section-title">
+    <i class="fa-solid fa-users" inert></i> {{localize 'DOGMALITER.Panel.Players'}}
+    <span class="dl-count">{{localize 'DOGMALITER.Panel.Online'}}: {{online}} / {{players.length}}</span>
+  </h3>
+
+  {{#each players as |player|}}
+    <article class="dl-card dl-player {{#unless player.active}}is-offline{{/unless}}" data-user-id="{{player.id}}"
+             {{#if player.actor}}data-actor-uuid="{{player.actor.uuid}}"{{/if}}>
+      <header class="dl-player-head">
+        <span class="dl-dot {{#if player.active}}is-online{{/if}}" style="--dl-user-color: {{player.color}}"
+              data-tooltip="{{#if player.active}}{{localize 'DOGMALITER.Panel.Online'}}{{else}}{{localize 'DOGMALITER.Panel.Offline'}}{{/if}}"></span>
+        <strong class="dl-player-name">{{player.name}}</strong>
+        <span class="dl-muted dl-grow">
+          {{#if player.active}}
+            <i class="fa-solid fa-map" inert></i> {{player.sceneName}}
+            {{#if player.away}}<span class="dl-tag">{{localize 'DOGMALITER.Panel.Elsewhere'}}</span>{{/if}}
+          {{else}}
+            {{localize 'DOGMALITER.Panel.Offline'}}
+          {{/if}}
+        </span>
+        {{#if player.away}}
+          <button type="button" class="dl-button dl-button--small" data-action="pullUser">
+            <i class="fa-solid fa-people-pulling" inert></i> {{localize 'DOGMALITER.Panel.PullHere'}}
+          </button>
+        {{/if}}
+      </header>
+
+      {{#if player.actor}}
+        {{> "systems/dogmaliter/templates/apps/gm-panel/actor-card.hbs" card=player.actor}}
+      {{else}}
+        <p class="dl-muted">{{localize 'DOGMALITER.Panel.NoCharacter'}}</p>
+      {{/if}}
+    </article>
+  {{else}}
+    <p class="dl-empty">{{localize 'DOGMALITER.Panel.NoPlayers'}}</p>
+  {{/each}}
+
+  <h3 class="dl-section-title">
+    <i class="fa-solid fa-chess-knight" inert></i> {{localize 'DOGMALITER.Panel.SceneTokens'}}
+    <span class="dl-count">{{tokens.length}}</span>
+  </h3>
+
+  {{#each tokens as |token|}}
+    <article class="dl-card dl-token {{#if token.hidden}}is-hidden{{/if}}" data-token-uuid="{{token.tokenUuid}}">
+      {{> "systems/dogmaliter/templates/apps/gm-panel/actor-card.hbs" card=token showHidden=true}}
+    </article>
+  {{else}}
+    <p class="dl-empty">{{localize 'DOGMALITER.Panel.NoTokens'}}</p>
+  {{/each}}
+</section>

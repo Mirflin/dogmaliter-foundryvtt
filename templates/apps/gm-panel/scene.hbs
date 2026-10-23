@@ -1,0 +1,235 @@
+{{!-- GM panel, Scene page: module/apps/gm-panel.mjs. A sub-menu of sections
+      (data-section); the ones with a list have a search field (data-search)
+      that hides rows (data-search-text) not matching it, without a redraw. --}}
+<section class="dl-tab {{#if active}}active{{/if}}" data-tab="scene">
+  {{#if hasScene}}
+
+    <nav class="dl-subnav">
+      {{#each sections as |section|}}
+        <a class="dl-subnav-item {{#if section.active}}active{{/if}}" data-action="sceneSection" data-section="{{section.id}}">
+          <i class="{{section.icon}}" inert></i> {{localize section.label}}
+          {{#if section.count}}<span class="dl-count">{{section.count}}</span>{{/if}}
+        </a>
+      {{/each}}
+    </nav>
+
+    {{!-- Scenes --}}
+    <div class="dl-subsection {{#if sections.0.active}}active{{/if}}" data-section="scenes">
+      <div class="dl-card">
+        <input type="text" class="dl-search" data-search="scenes" value="{{search.scenes}}" spellcheck="false"
+               placeholder="{{localize 'DOGMALITER.Panel.Search'}}" aria-label="{{localize 'DOGMALITER.Panel.Search'}}"/>
+        <ol class="dl-list" data-search-list="scenes">
+          {{#each scenes as |s|}}
+            <li class="dl-list-row {{#if s.viewed}}is-current{{/if}}" data-scene-id="{{s.id}}" data-search-text="{{s.name}}">
+              {{#if s.thumb}}<img class="dl-thumb" src="{{s.thumb}}" alt=""/>{{else}}<span class="dl-thumb"></span>{{/if}}
+              <span class="dl-grow">
+                {{s.name}}
+                {{#if s.active}}<span class="dl-tag">{{localize 'DOGMALITER.Panel.SceneActive'}}</span>{{/if}}
+                {{#if s.viewed}}<span class="dl-tag dl-tag--quiet">{{localize 'DOGMALITER.Panel.SceneViewed'}}</span>{{/if}}
+              </span>
+              <button type="button" class="dl-icon-button" data-action="viewScene"
+                      data-tooltip="{{localize 'DOGMALITER.Panel.ViewScene'}}" aria-label="{{localize 'DOGMALITER.Panel.ViewScene'}}">
+                <i class="fa-solid fa-eye" inert></i>
+              </button>
+              <button type="button" class="dl-icon-button" data-action="activateScene"
+                      data-tooltip="{{localize 'DOGMALITER.Panel.ActivateScene'}}" aria-label="{{localize 'DOGMALITER.Panel.ActivateScene'}}">
+                <i class="fa-solid fa-bullseye" inert></i>
+              </button>
+            </li>
+          {{/each}}
+        </ol>
+      </div>
+    </div>
+
+    {{!-- Controls: the scene being viewed --}}
+    <div class="dl-subsection {{#if sections.1.active}}active{{/if}}" data-section="controls">
+      <div class="dl-card">
+        <h3 class="dl-card-title"><i class="fa-solid fa-map" inert></i> {{sceneName}}</h3>
+        <div class="dl-row dl-row--wrap">
+          <button type="button" class="dl-button {{#if paused}}is-warning{{/if}}" data-action="togglePause">
+            {{#if paused}}
+              <i class="fa-solid fa-play" inert></i> {{localize 'DOGMALITER.Panel.Unpause'}}
+            {{else}}
+              <i class="fa-solid fa-pause" inert></i> {{localize 'DOGMALITER.Panel.Pause'}}
+            {{/if}}
+          </button>
+          <button type="button" class="dl-button" data-action="pullAll">
+            <i class="fa-solid fa-people-pulling" inert></i> {{localize 'DOGMALITER.Panel.PullAll'}}
+          </button>
+        </div>
+      </div>
+
+      <div class="dl-card">
+        <h3 class="dl-card-title"><i class="fa-solid fa-sun" inert></i> {{localize 'DOGMALITER.Panel.Lighting'}}</h3>
+        <div class="dl-row dl-row--wrap">
+          <button type="button" class="dl-toggle {{#if globalLight}}is-on{{/if}}" data-action="globalLight" aria-pressed="{{globalLight}}">
+            <span class="dl-switch" aria-hidden="true"></span> {{localize 'DOGMALITER.Panel.GlobalLight'}}
+          </button>
+          <button type="button" class="dl-toggle {{#if tokenVision}}is-on{{/if}}" data-action="tokenVision" aria-pressed="{{tokenVision}}">
+            <span class="dl-switch" aria-hidden="true"></span> {{localize 'DOGMALITER.Panel.TokenVision'}}
+          </button>
+          <button type="button" class="dl-button dl-button--quiet" data-action="resetFog">
+            <i class="fa-solid fa-cloud" inert></i> {{localize 'DOGMALITER.Panel.ResetFog'}}
+          </button>
+        </div>
+        <div class="dl-row">
+          <span class="dl-label">{{localize 'DOGMALITER.Panel.Darkness'}}</span>
+          <input class="dl-grow" type="range" min="0" max="1" step="0.05" value="{{darkness}}" data-change="darkness"
+                 aria-label="{{localize 'DOGMALITER.Panel.Darkness'}}"/>
+          <output class="dl-output">{{darknessPct}}%</output>
+        </div>
+        <div class="dl-row dl-row--wrap">
+          <button type="button" class="dl-button dl-button--quiet" data-action="darknessPreset" data-value="0">
+            <i class="fa-solid fa-sun" inert></i> {{localize 'DOGMALITER.Panel.Day'}}
+          </button>
+          <button type="button" class="dl-button dl-button--quiet" data-action="darknessPreset" data-value="0.5">
+            <i class="fa-solid fa-cloud-sun" inert></i> {{localize 'DOGMALITER.Panel.Dusk'}}
+          </button>
+          <button type="button" class="dl-button dl-button--quiet" data-action="darknessPreset" data-value="1">
+            <i class="fa-solid fa-moon" inert></i> {{localize 'DOGMALITER.Panel.Night'}}
+          </button>
+        </div>
+        <div class="dl-row">
+          <span class="dl-label">{{localize 'DOGMALITER.Panel.Weather'}}</span>
+          <select class="dl-grow" data-change="weather" aria-label="{{localize 'DOGMALITER.Panel.Weather'}}">
+            <option value="" {{#if noWeather}}selected{{/if}}>{{localize 'DOGMALITER.Panel.NoWeather'}}</option>
+            {{#each weather as |w|}}
+              <option value="{{w.id}}" {{#if w.selected}}selected{{/if}}>{{w.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {{!-- Lights --}}
+    <div class="dl-subsection {{#if sections.2.active}}active{{/if}}" data-section="lights">
+      <div class="dl-card">
+        <div class="dl-row">
+          <input type="text" class="dl-search dl-grow" data-search="lights" value="{{search.lights}}" spellcheck="false"
+                 placeholder="{{localize 'DOGMALITER.Panel.SearchWhere'}}" aria-label="{{localize 'DOGMALITER.Panel.Search'}}"/>
+          <span class="dl-count">{{lightsOn}} / {{lights.length}}</span>
+          <button type="button" class="dl-button dl-button--small" data-action="lightsAll" data-on="1">{{localize 'DOGMALITER.Panel.AllOn'}}</button>
+          <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="lightsAll" data-on="0">{{localize 'DOGMALITER.Panel.AllOff'}}</button>
+        </div>
+        <ol class="dl-list" data-search-list="lights">
+          {{#each lights as |light|}}
+            <li class="dl-list-row" data-light-id="{{light.id}}" data-search-text="{{light.label}} {{light.where}}">
+              <span class="dl-swatch" {{#if light.color}}style="background: {{light.color}}"{{/if}}></span>
+              <span class="dl-grow">
+                {{light.label}} <span class="dl-muted">{{light.bright}} / {{light.dim}}</span>
+                {{#if light.where}}<br/><span class="dl-where"><i class="fa-solid fa-draw-polygon" inert></i> {{light.where}}</span>{{/if}}
+              </span>
+              <button type="button" class="dl-icon-button" data-action="lightPan"
+                      data-tooltip="{{localize 'DOGMALITER.Panel.ShowOnMap'}}" aria-label="{{localize 'DOGMALITER.Panel.ShowOnMap'}}">
+                <i class="fa-solid fa-location-crosshairs" inert></i>
+              </button>
+              <button type="button" class="dl-toggle dl-toggle--bare {{#if light.on}}is-on{{/if}}" data-action="lightToggle"
+                      aria-pressed="{{light.on}}" aria-label="{{light.label}}">
+                <span class="dl-switch" aria-hidden="true"></span>
+              </button>
+            </li>
+          {{else}}
+            <li class="dl-empty">{{localize 'DOGMALITER.Panel.NoLights'}}</li>
+          {{/each}}
+        </ol>
+      </div>
+    </div>
+
+    {{!-- Doors --}}
+    <div class="dl-subsection {{#if sections.3.active}}active{{/if}}" data-section="doors">
+      <div class="dl-card">
+        <div class="dl-row dl-row--wrap">
+          <input type="text" class="dl-search dl-grow" data-search="doors" value="{{search.doors}}" spellcheck="false"
+                 placeholder="{{localize 'DOGMALITER.Panel.SearchWhere'}}" aria-label="{{localize 'DOGMALITER.Panel.Search'}}"/>
+          <span class="dl-count">{{localize 'DOGMALITER.Panel.DoorsOpen'}}: {{doorsOpen}} / {{doors.length}}</span>
+        </div>
+        <div class="dl-row dl-row--wrap">
+          <button type="button" class="dl-button dl-button--small" data-action="doorsAll" data-state="0">
+            <i class="fa-solid fa-door-closed" inert></i> {{localize 'DOGMALITER.Panel.DoorsCloseAll'}}
+          </button>
+          <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="doorsAll" data-state="1">
+            <i class="fa-solid fa-door-open" inert></i> {{localize 'DOGMALITER.Panel.DoorsOpenAll'}}
+          </button>
+          <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="doorsAll" data-state="2">
+            <i class="fa-solid fa-lock" inert></i> {{localize 'DOGMALITER.Panel.DoorsLockAll'}}
+          </button>
+        </div>
+        <ol class="dl-list" data-search-list="doors">
+          {{#each doors as |door|}}
+            <li class="dl-list-row" data-wall-id="{{door.id}}" data-search-text="{{door.label}} {{door.where}}">
+              <i class="fa-solid {{#if door.locked}}fa-lock{{else if door.open}}fa-door-open{{else}}fa-door-closed{{/if}} dl-door-icon {{#if door.open}}is-open{{/if}} {{#if door.locked}}is-locked{{/if}}" inert></i>
+              <span class="dl-grow">
+                {{door.label}}
+                {{#if door.secret}}<span class="dl-tag dl-tag--quiet">{{localize 'DOGMALITER.Panel.DoorSecret'}}</span>{{/if}}
+                {{#if door.where}}<br/><span class="dl-where"><i class="fa-solid fa-draw-polygon" inert></i> {{door.where}}</span>{{/if}}
+              </span>
+              <button type="button" class="dl-icon-button" data-action="doorPan"
+                      data-tooltip="{{localize 'DOGMALITER.Panel.ShowOnMap'}}" aria-label="{{localize 'DOGMALITER.Panel.ShowOnMap'}}">
+                <i class="fa-solid fa-location-crosshairs" inert></i>
+              </button>
+              {{#if door.open}}
+                <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="doorState" data-state="0">
+                  <i class="fa-solid fa-door-closed" inert></i> {{localize 'DOGMALITER.Panel.DoorClose'}}
+                </button>
+              {{else}}
+                <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="doorState" data-state="1">
+                  <i class="fa-solid fa-door-open" inert></i> {{localize 'DOGMALITER.Panel.DoorOpen'}}
+                </button>
+              {{/if}}
+              {{#if door.locked}}
+                <button type="button" class="dl-icon-button is-active" data-action="doorState" data-state="0"
+                        data-tooltip="{{localize 'DOGMALITER.Panel.DoorUnlock'}}" aria-label="{{localize 'DOGMALITER.Panel.DoorUnlock'}}">
+                  <i class="fa-solid fa-lock" inert></i>
+                </button>
+              {{else}}
+                <button type="button" class="dl-icon-button" data-action="doorState" data-state="2"
+                        data-tooltip="{{localize 'DOGMALITER.Panel.DoorLock'}}" aria-label="{{localize 'DOGMALITER.Panel.DoorLock'}}">
+                  <i class="fa-solid fa-lock-open" inert></i>
+                </button>
+              {{/if}}
+            </li>
+          {{else}}
+            <li class="dl-empty">{{localize 'DOGMALITER.Panel.NoDoors'}}</li>
+          {{/each}}
+        </ol>
+      </div>
+    </div>
+
+    {{!-- Ambient sounds --}}
+    <div class="dl-subsection {{#if sections.4.active}}active{{/if}}" data-section="sounds">
+      <div class="dl-card">
+        <div class="dl-row">
+          <input type="text" class="dl-search dl-grow" data-search="sounds" value="{{search.sounds}}" spellcheck="false"
+                 placeholder="{{localize 'DOGMALITER.Panel.SearchWhere'}}" aria-label="{{localize 'DOGMALITER.Panel.Search'}}"/>
+          <span class="dl-count">{{soundsOn}} / {{sounds.length}}</span>
+          <button type="button" class="dl-button dl-button--small" data-action="soundsAll" data-on="1">{{localize 'DOGMALITER.Panel.AllOn'}}</button>
+          <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="soundsAll" data-on="0">{{localize 'DOGMALITER.Panel.AllOff'}}</button>
+        </div>
+        <ol class="dl-list" data-search-list="sounds">
+          {{#each sounds as |sound|}}
+            <li class="dl-list-row" data-sound-id="{{sound.id}}" data-search-text="{{sound.label}} {{sound.where}}">
+              <i class="fa-solid fa-music dl-door-icon" inert></i>
+              <span class="dl-grow">
+                {{sound.label}}
+                {{#if sound.where}}<br/><span class="dl-where"><i class="fa-solid fa-draw-polygon" inert></i> {{sound.where}}</span>{{/if}}
+              </span>
+              <button type="button" class="dl-icon-button" data-action="soundPan"
+                      data-tooltip="{{localize 'DOGMALITER.Panel.ShowOnMap'}}" aria-label="{{localize 'DOGMALITER.Panel.ShowOnMap'}}">
+                <i class="fa-solid fa-location-crosshairs" inert></i>
+              </button>
+              <button type="button" class="dl-toggle dl-toggle--bare {{#if sound.on}}is-on{{/if}}" data-action="soundToggle"
+                      aria-pressed="{{sound.on}}" aria-label="{{sound.label}}">
+                <span class="dl-switch" aria-hidden="true"></span>
+              </button>
+            </li>
+          {{else}}
+            <li class="dl-empty">{{localize 'DOGMALITER.Panel.NoSounds'}}</li>
+          {{/each}}
+        </ol>
+      </div>
+    </div>
+
+  {{else}}
+    <p class="dl-empty">{{localize 'DOGMALITER.Panel.NoScene'}}</p>
+  {{/if}}
+</section>

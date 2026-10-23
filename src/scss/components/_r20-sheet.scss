@@ -70,11 +70,15 @@ $r20-danger: #e06b72;
 
 .r20-header {
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 12px 14px 10px;
   background: $r20-panel;
   border-bottom: 1px solid $r20-line;
 
   .r20-name {
+    flex: 1 1 auto;
     height: auto;
     background: transparent;
     border-color: transparent;
@@ -84,6 +88,135 @@ $r20-danger: #e06b72;
     &:hover {
       border-color: $r20-line;
     }
+  }
+
+  // The stat check.
+  .r20-button {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+}
+
+// Health / mana / AP, under the header on every page. A switched-off one
+// shrinks to its name and checkbox.
+.r20-resources {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  background: $r20-panel;
+  border-bottom: 1px solid $r20-line;
+}
+
+.r20-resource {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 8px;
+  background: $r20-bg;
+  border: 1px solid $r20-line;
+  border-top: 2px solid var(--r20-resource-color, #{$r20-cyan});
+  border-radius: 3px;
+
+  &.is-off {
+    flex: 0 0 auto;
+    justify-content: center;
+    border-top-color: $r20-line;
+    opacity: 0.7;
+  }
+
+  .r20-label {
+    margin: 0;
+  }
+
+  select {
+    width: 100%;
+    height: 24px;
+    padding: 0 4px;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-muted;
+    font-size: 11px;
+
+    option {
+      background: $r20-panel;
+      color: $r20-text;
+    }
+  }
+}
+
+// Who sees the bar / the number: an icon and a small select.
+.r20-resource-view {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: $r20-muted;
+  font-size: 11px;
+
+  i {
+    flex: 0 0 14px;
+    text-align: center;
+  }
+
+  select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.r20-resource-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    accent-color: var(--r20-resource-color, #{$r20-cyan});
+  }
+}
+
+.r20-resource-values {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  input[type='number'] {
+    width: 100%;
+    min-width: 0;
+    height: 28px;
+    margin: 0;
+    padding: 4px 6px;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+
+    &:focus {
+      border-color: var(--r20-resource-color, #{$r20-cyan});
+      outline: none;
+    }
+  }
+}
+
+.r20-resource-bar {
+  height: 4px;
+  overflow: hidden;
+  background: $r20-panel-2;
+  border-radius: 2px;
+
+  > span {
+    display: block;
+    height: 100%;
+    background: var(--r20-resource-color, #{$r20-cyan});
   }
 }
 

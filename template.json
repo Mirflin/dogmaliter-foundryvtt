@@ -6,12 +6,26 @@
         "health": {
           "value": 10,
           "min": 0,
-          "max": 10
+          "max": 10,
+          "enabled": true,
+          "showBar": "owner",
+          "showValue": "owner"
         },
-        "power": {
+        "mana": {
           "value": 5,
           "min": 0,
-          "max": 5
+          "max": 5,
+          "enabled": true,
+          "showBar": "owner",
+          "showValue": "owner"
+        },
+        "ap": {
+          "value": 3,
+          "min": 0,
+          "max": 3,
+          "enabled": true,
+          "showBar": "owner",
+          "showValue": "owner"
         },
         "biography": "",
         "attributes": {}

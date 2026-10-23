@@ -1,0 +1,975 @@
+// GM panel (module/apps/gm-panel.mjs, templates/apps/gm-panel/) and the stat
+// check dialog (templates/dialogs/stat-roll.hbs), in the actor sheet's
+// colours: the $r20-* variables of _r20-sheet.scss, imported before this.
+
+&.dl-panel {
+  .window-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    background: $r20-bg;
+    color: $r20-text;
+    font-family: $font-primary;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  input[type='text'],
+  select {
+    min-width: 0;
+    height: 30px;
+    margin: 0;
+    padding: 4px 8px;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+    font-family: $font-primary;
+    font-size: 13px;
+    box-shadow: none;
+
+    &:focus {
+      border-color: $r20-cyan;
+      outline: 2px solid $r20-cyan-soft;
+      outline-offset: 0;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+    }
+
+    &::placeholder {
+      color: $r20-muted;
+      opacity: 1;
+    }
+  }
+
+  select option {
+    background: $r20-panel;
+    color: $r20-text;
+  }
+
+  // Foundry's own range style is barely visible on this background.
+  input[type='range'] {
+    min-width: 0;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    appearance: none;
+    cursor: pointer;
+
+    &::-webkit-slider-runnable-track {
+      height: 4px;
+      background: $r20-line;
+      border-radius: 2px;
+    }
+
+    &::-webkit-slider-thumb {
+      width: 14px;
+      height: 14px;
+      margin-top: -5px;
+      background: $r20-cyan;
+      border: 2px solid $r20-bg;
+      border-radius: 50%;
+      appearance: none;
+    }
+
+    &::-moz-range-track {
+      height: 4px;
+      background: $r20-line;
+      border-radius: 2px;
+    }
+
+    &::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+      background: $r20-cyan;
+      border: 2px solid $r20-bg;
+      border-radius: 50%;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $r20-cyan-soft;
+      outline-offset: 2px;
+    }
+  }
+
+  code {
+    padding: 1px 4px;
+    background: $r20-panel-2;
+    border: none;
+    border-radius: 2px;
+    color: $r20-muted;
+  }
+}
+
+/* Pages */
+
+.dl-panel-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 12px 0;
+  background: $r20-panel;
+  border-bottom: 1px solid $r20-line;
+}
+
+.dl-panel-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  color: $r20-muted;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: none;
+  cursor: pointer;
+
+  &:hover {
+    color: $r20-text;
+    text-shadow: none;
+  }
+
+  &.active {
+    margin-bottom: -1px;
+    background: $r20-bg;
+    border-color: $r20-line;
+    box-shadow: inset 0 2px 0 $r20-cyan;
+    color: $r20-cyan;
+  }
+}
+
+.dl-tab {
+  display: none;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  scrollbar-color: $r20-line $r20-bg;
+
+  &.active {
+    display: block;
+  }
+}
+
+/* Building blocks */
+
+.dl-card {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-radius: 4px;
+}
+
+.dl-card-title,
+.dl-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  border: none;
+  color: $r20-cyan;
+  font-family: $font-primary;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dl-section-title {
+  margin: 16px 0 8px;
+}
+
+.dl-count {
+  color: $r20-muted;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.dl-title-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.dl-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  // Not `& + &`: inside `.dogmaliter` that would need two `.dogmaliter`s.
+  & + .dl-row {
+    margin-top: 8px;
+  }
+
+  &--wrap {
+    flex-wrap: wrap;
+  }
+}
+
+.dl-grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dl-label {
+  flex: 0 0 auto;
+  min-width: 90px;
+  color: $r20-muted;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dl-output {
+  min-width: 42px;
+  color: $r20-text;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dl-hint {
+  margin: 6px 0 0;
+  color: $r20-muted;
+  font-size: 11px;
+}
+
+.dl-muted {
+  color: $r20-muted;
+}
+
+.dl-empty {
+  padding: 12px 0;
+  color: $r20-muted;
+  font-style: italic;
+  text-align: center;
+  list-style: none;
+}
+
+.dl-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  background: $r20-cyan-soft;
+  border-radius: 8px;
+  color: $r20-cyan;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Buttons and switches */
+
+.dl-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  height: 30px;
+  margin: 0;
+  padding: 0 12px;
+  background: $r20-cyan-deep;
+  border: 1px solid $r20-cyan;
+  border-radius: 3px;
+  color: #fff;
+  font-family: $font-primary;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: $r20-cyan;
+    box-shadow: none;
+    outline: none;
+  }
+
+  &--quiet {
+    background: transparent;
+    border-color: $r20-line;
+    color: $r20-text;
+
+    &:hover,
+    &:focus-visible {
+      background: $r20-panel-2;
+      border-color: $r20-cyan;
+    }
+  }
+
+  &--small {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  &.is-warning {
+    background: #a8741a;
+    border-color: #d39b35;
+  }
+}
+
+.dl-icon-button {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: $r20-muted;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $r20-cyan;
+    box-shadow: none;
+    color: $r20-cyan;
+    outline: none;
+  }
+
+  &.is-active {
+    color: $r20-danger;
+  }
+
+  &--danger:hover,
+  &--danger:focus-visible {
+    border-color: $r20-danger;
+    color: $r20-danger;
+  }
+}
+
+.dl-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: 30px;
+  margin: 0;
+  padding: 0 10px 0 6px;
+  background: transparent;
+  border: 1px solid $r20-line;
+  border-radius: 15px;
+  color: $r20-text;
+  font-family: $font-primary;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $r20-cyan;
+    box-shadow: none;
+    outline: none;
+  }
+
+  &--bare {
+    padding: 0 4px;
+    border-color: transparent;
+  }
+}
+
+.dl-switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 16px;
+  background: $r20-line;
+  border-radius: 8px;
+  transition: background 120ms;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    background: $r20-muted;
+    border-radius: 50%;
+    transition: transform 120ms, background 120ms;
+  }
+}
+
+.dl-toggle.is-on .dl-switch {
+  background: $r20-cyan-deep;
+
+  &::after {
+    background: #fff;
+    transform: translateX(14px);
+  }
+}
+
+/* Lists (lights, footstep regions) */
+
+.dl-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dl-list-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid $r20-line;
+
+  &:first-child {
+    border-top: none;
+  }
+}
+
+.dl-swatch {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  background: $r20-panel-2;
+  border: 1px solid $r20-line;
+  border-radius: 50%;
+}
+
+.dl-path {
+  font-size: 11px;
+  word-break: break-all;
+}
+
+/* Players and tokens */
+
+.dl-player-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dl-dot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  background: $r20-line;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--dl-user-color, transparent);
+
+  &.is-online {
+    background: #3fbf6f;
+  }
+}
+
+.dl-player.is-offline,
+.dl-token.is-hidden {
+  opacity: 0.6;
+}
+
+.dl-actor {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.dl-actor-img {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  background: $r20-panel-2;
+  border: 1px solid $r20-line;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dl-actor-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dl-actor-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.dl-actor-name {
+  color: $r20-text;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    color: $r20-cyan;
+    text-shadow: none;
+  }
+}
+
+.dl-effects {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+
+  img {
+    width: 20px;
+    height: 20px;
+    background: $r20-panel-2;
+    border: none;
+    border-radius: 3px;
+  }
+}
+
+.dl-attrs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 6px;
+}
+
+.dl-attr {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 5px 6px;
+  background: $r20-bg;
+  border: 1px solid $r20-line;
+  border-radius: 3px;
+
+  &.is-low {
+    border-color: $r20-danger;
+  }
+}
+
+.dl-attr-name {
+  overflow: hidden;
+  color: $r20-muted;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dl-attr-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  input[type='text'] {
+    width: 60px;
+    height: 24px;
+    padding: 2px 6px;
+    text-align: right;
+  }
+}
+
+.dl-attr-max {
+  color: $r20-muted;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.dl-bar {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  background: $r20-panel-2;
+  border-radius: 2px;
+
+  > span {
+    display: block;
+    height: 100%;
+    background: $r20-cyan;
+  }
+}
+
+.dl-attr.is-low .dl-bar > span {
+  background: $r20-danger;
+}
+
+/* Sounds */
+
+.dl-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dl-binding {
+  margin: 0 0 8px;
+  padding: 8px;
+  background: $r20-bg;
+  border: 1px solid $r20-line;
+  border-radius: 4px;
+}
+
+.dl-binding-row {
+  display: grid;
+  align-items: center;
+  gap: 6px;
+
+  &:first-child {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) 30px;
+  }
+
+  & + .dl-binding-row {
+    grid-template-columns: minmax(0, 1.6fr) 30px 90px minmax(0, 1fr) 30px;
+    margin-top: 6px;
+  }
+}
+
+/* Players page: what to show */
+
+.dl-view {
+  > summary {
+    margin: 0;
+    cursor: pointer;
+    list-style: none;
+
+    &::before {
+      content: '\25B8';
+      color: $r20-muted;
+    }
+  }
+
+  &[open] > summary {
+    margin-bottom: 8px;
+
+    &::before {
+      content: '\25BE';
+    }
+  }
+}
+
+.dl-view-group {
+  & + .dl-view-group {
+    margin-top: 10px;
+  }
+
+  > .dl-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+}
+
+.dl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// A checkbox as a pill: ticked, it fills with the accent (or the resource's colour).
+.dl-chip {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  span {
+    padding: 4px 10px;
+    background: $r20-bg;
+    border: 1px solid $r20-line;
+    border-radius: 12px;
+    color: $r20-muted;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  &:hover span {
+    border-color: var(--dl-chip-color, #{$r20-cyan});
+    color: $r20-text;
+  }
+
+  input:checked + span {
+    background: var(--dl-chip-color, #{$r20-cyan-deep});
+    border-color: var(--dl-chip-color, #{$r20-cyan});
+    color: #fff;
+  }
+
+  input:focus-visible + span {
+    outline: 2px solid $r20-cyan-soft;
+    outline-offset: 1px;
+  }
+}
+
+/* Scene page sub-menu */
+
+.dl-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 12px;
+}
+
+.dl-subnav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-radius: 14px;
+  color: $r20-muted;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $r20-cyan;
+    color: $r20-text;
+    text-shadow: none;
+  }
+
+  &.active {
+    background: $r20-cyan-deep;
+    border-color: $r20-cyan;
+    color: #fff;
+
+    .dl-count {
+      color: #fff;
+      opacity: 0.8;
+    }
+  }
+}
+
+.dl-subsection {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+.dl-search {
+  width: 100%;
+  margin-bottom: 8px !important;
+}
+
+.dl-row .dl-search {
+  margin-bottom: 0 !important;
+}
+
+.dl-list-row[hidden] {
+  display: none;
+}
+
+.dl-list-row.is-current {
+  background: $r20-cyan-soft;
+}
+
+.dl-thumb {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 30px;
+  object-fit: cover;
+  background: $r20-panel-2;
+  border: 1px solid $r20-line;
+  border-radius: 3px;
+}
+
+.dl-where {
+  color: $r20-muted;
+  font-size: 11px;
+}
+
+.dl-tag--quiet {
+  background: $r20-panel-2;
+  color: $r20-muted;
+}
+
+.dl-door-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  color: $r20-muted;
+  text-align: center;
+
+  &.is-open {
+    color: $r20-cyan;
+  }
+
+  &.is-locked {
+    color: $r20-danger;
+  }
+}
+
+/* Resources on a card: the bar in the resource's colour */
+
+.dl-attr--resource {
+  border-top: 2px solid var(--dl-resource-color, #{$r20-cyan});
+
+  .dl-bar > span {
+    background: var(--dl-resource-color, #{$r20-cyan});
+  }
+}
+
+/* Attributes of new actors */
+
+.dl-template {
+  > summary {
+    margin: 0;
+    cursor: pointer;
+    list-style: none;
+
+    &::before {
+      content: '\25B8';
+      color: $r20-muted;
+    }
+  }
+
+  &[open] > summary {
+    margin-bottom: 8px;
+
+    &::before {
+      content: '\25BE';
+    }
+  }
+}
+
+.dl-template-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.dl-template-head {
+  color: $r20-muted;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Regions */
+
+.dl-region {
+  border-left: 4px solid var(--dl-region-color, #{$r20-line});
+
+  &.is-off {
+    opacity: 0.6;
+  }
+
+  > .dl-hint {
+    margin: 6px 0 0;
+  }
+}
+
+.dl-region-name {
+  font-weight: 700;
+}
+
+.dl-color {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 2px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.dl-behaviors {
+  margin: 8px 0;
+}
+
+.dl-behavior {
+  padding: 6px 0;
+  border-top: 1px solid $r20-line;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &.is-off > .dl-row {
+    opacity: 0.55;
+  }
+}
+
+.dl-behavior-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  color: $r20-cyan;
+  text-align: center;
+}
+
+.dl-footsteps-fields {
+  margin: 6px 0 0 26px;
+  padding: 8px;
+  background: $r20-bg;
+  border: 1px solid $r20-line;
+  border-radius: 3px;
+}
+
+.dl-field {
+  display: flex;
+  flex: 1 1 120px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+
+  > span {
+    color: $r20-muted;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  input[type='number'] {
+    width: 100%;
+    height: 26px;
+    margin: 0;
+    padding: 2px 6px;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+  }
+}
+
+/* The stat check dialog */
+
+&.dl-stat-roll-dialog .dl-stat-roll {
+  // The attack fields only count with "Attack" ticked.
+  &:has([name='isAttack']:not(:checked)) .dl-stat-roll-attack {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .dl-stat-roll-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}

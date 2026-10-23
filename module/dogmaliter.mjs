@@ -1,6 +1,8 @@
 // Import document classes.
 import { DogmaLiterActor } from './documents/actor.mjs';
 import { DogmaLiterItem } from './documents/item.mjs';
+import { DogmaLiterTokenDocument } from './documents/token.mjs';
+import { registerTokenBars } from './canvas/token.mjs';
 // Import sheet classes.
 import { DogmaLiterActorSheet } from './sheets/actor-sheet.mjs';
 import { DogmaLiterItemSheet } from './sheets/item-sheet.mjs';
@@ -8,6 +10,13 @@ import { DogmaLiterItemSheet } from './sheets/item-sheet.mjs';
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { DOGMALITER } from './helpers/config.mjs';
 import { registerEditorFonts } from './helpers/fonts.mjs';
+import { registerSettings } from './helpers/settings.mjs';
+import { migrateWorld } from './helpers/migration.mjs';
+// The stat check, sound bindings, footsteps, the GM panel.
+import { rollStat } from './rolls/stat-roll.mjs';
+import { fireTrigger, registerTriggerHooks } from './audio/triggers.mjs';
+import { registerFootsteps } from './audio/footsteps.mjs';
+import { gmPanel, registerGmPanelControls, registerGmPanelHooks } from './apps/gm-panel.mjs';
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -20,6 +29,9 @@ Hooks.once('init', function () {
     DogmaLiterActor,
     DogmaLiterItem,
     rollItemMacro,
+    rollStat,
+    fireTrigger,
+    gmPanel,
   };
 
   // Add custom constants for configuration.
@@ -27,6 +39,10 @@ Hooks.once('init', function () {
 
   // Russian + English fonts for the rich-text editor's Font menu.
   registerEditorFonts();
+
+  registerSettings();
+  registerFootsteps();
+  registerGmPanelControls();
 
   /**
    * Set an initiative formula for the system
@@ -40,6 +56,9 @@ Hooks.once('init', function () {
   // Define custom Document classes
   CONFIG.Actor.documentClass = DogmaLiterActor;
   CONFIG.Item.documentClass = DogmaLiterItem;
+  CONFIG.Token.documentClass = DogmaLiterTokenDocument;
+  // Health / mana / AP bars stacked above the token.
+  registerTokenBars();
 
   // Active Effects are never copied to the Actor,
   // but will still apply to the Actor from within the Item
@@ -85,6 +104,10 @@ Handlebars.registerHelper('toLowerCase', function (str) {
 Hooks.once('ready', function () {
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
+
+  registerTriggerHooks();
+  registerGmPanelHooks();
+  migrateWorld();
 });
 
 /* -------------------------------------------- */

@@ -10,6 +10,9 @@
  *                 and delete each one. "Send" fires the
  *                 `dogmaliter.sendItem` hook (see `_onItemSend`).
  *
+ * The "Roll" button in the header opens the stat check
+ * (module/rolls/stat-roll.mjs) for this actor.
+ *
  * Both images use Foundry's own `data-edit` mechanism: clicking one opens the
  * file picker, and the chosen path is written to the document path named in
  * the attribute (`img` for the portrait, `prototypeToken.texture.src` for the
@@ -65,6 +68,13 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
     const tokenSrc = actor.prototypeToken?.texture?.src;
     context.token = isDefault(tokenSrc) ? null : tokenSrc;
     context.attributes = actor.attributeList;
+    context.resources = actor.resourceList;
+    // Who sees a resource's bar above the token, and the number on it.
+    context.viewerChoices = {
+      none: 'DOGMALITER.Sheet.ShowNone',
+      owner: 'DOGMALITER.Sheet.ShowOwner',
+      all: 'DOGMALITER.Sheet.ShowAll',
+    };
     context.inventory = actor.items.contents
       .sort((a, b) => (a.sort || 0) - (b.sort || 0) || a.name.localeCompare(b.name))
       .map((item) => {
@@ -154,6 +164,7 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
     html.on('click', '[data-action="image-remove"]', this._onImageRemove.bind(this));
     html.on('click', '[data-action="item-send"]', this._onItemSend.bind(this));
     html.on('click', '[data-action="item-delete"]', this._onItemDelete.bind(this));
+    html.on('click', '[data-action="stat-roll"]', this._onStatRoll.bind(this));
 
     // A row that was just added gets the cursor in its name field. Done here,
     // after the re-render the new row caused, because before it the row is
@@ -228,6 +239,17 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
   async _onTokenFromPortrait(event) {
     event.preventDefault();
     await this.actor.update({ 'prototypeToken.texture.src': this.actor.img });
+  }
+
+  /**
+   * The stat check (module/rolls/stat-roll.mjs) for this actor. A token's
+   * sheet speaks as that token; a character's sheet as its token on the
+   * scene, if it has one.
+   * @param {Event} event
+   */
+  _onStatRoll(event) {
+    event.preventDefault();
+    game.dogmaliter.rollStat({ actor: this.actor, token: this.token?.object ?? null });
   }
 
   /* -------------------------------------------- */

@@ -1,0 +1,56 @@
+{{!-- One actor on the GM panel's Players page: picture, name, shown
+      attributes (editable), effects. `card` is from actorCard() in
+      module/apps/gm-panel.mjs; `showHidden` adds the token's show/hide button. --}}
+<div class="dl-actor">
+  <img class="dl-actor-img" src="{{card.img}}" alt="" data-action="openSheet"
+       data-tooltip="{{localize 'DOGMALITER.Panel.OpenSheet'}}"/>
+  <div class="dl-actor-body">
+    <div class="dl-actor-head">
+      <a class="dl-actor-name" data-action="openSheet">{{card.name}}</a>
+      {{#if card.tokenId}}
+        <button type="button" class="dl-icon-button" data-action="panToken" data-token-id="{{card.tokenId}}"
+                data-tooltip="{{localize 'DOGMALITER.Panel.ShowOnMap'}}" aria-label="{{localize 'DOGMALITER.Panel.ShowOnMap'}}">
+          <i class="fa-solid fa-location-crosshairs" inert></i>
+        </button>
+        {{#if showHidden}}
+          <button type="button" class="dl-icon-button {{#if card.hidden}}is-active{{/if}}" data-action="tokenHidden"
+                  data-token-id="{{card.tokenId}}"
+                  data-tooltip="{{#if card.hidden}}{{localize 'DOGMALITER.Panel.ShowToken'}}{{else}}{{localize 'DOGMALITER.Panel.HideToken'}}{{/if}}"
+                  aria-label="{{#if card.hidden}}{{localize 'DOGMALITER.Panel.ShowToken'}}{{else}}{{localize 'DOGMALITER.Panel.HideToken'}}{{/if}}">
+            <i class="fa-solid {{#if card.hidden}}fa-eye-slash{{else}}fa-eye{{/if}}" inert></i>
+          </button>
+        {{/if}}
+      {{else}}
+        <span class="dl-tag">{{localize 'DOGMALITER.Panel.NotOnScene'}}</span>
+      {{/if}}
+      {{#if card.effects.length}}
+        <span class="dl-effects">
+          {{#each card.effects as |effect|}}<img src="{{effect.img}}" alt="{{effect.name}}" data-tooltip="{{effect.name}}"/>{{/each}}
+        </span>
+      {{/if}}
+    </div>
+
+    <div class="dl-attrs">
+      {{#each card.resources as |res|}}
+        <label class="dl-attr dl-attr--resource" style="--dl-resource-color: {{res.color}}">
+          <span class="dl-attr-name">{{localize res.label}}</span>
+          <span class="dl-attr-value">
+            <input type="text" value="{{res.value}}" data-change="attribute" data-resource="{{res.key}}" spellcheck="false"/>
+            <span class="dl-attr-max">/ {{res.max}}</span>
+          </span>
+          <span class="dl-bar"><span style="width: {{res.pct}}%"></span></span>
+        </label>
+      {{/each}}
+      {{#each card.attributes as |attr|}}
+        <label class="dl-attr {{#if attr.low}}is-low{{/if}}">
+          <span class="dl-attr-name">{{attr.name}}</span>
+          <span class="dl-attr-value">
+            <input type="text" value="{{attr.value}}" data-change="attribute" data-attribute-id="{{attr.id}}" spellcheck="false"/>
+            {{#if attr.max}}<span class="dl-attr-max">/ {{attr.max}}</span>{{/if}}
+          </span>
+          {{#if attr.hasBar}}<span class="dl-bar"><span style="width: {{attr.pct}}%"></span></span>{{/if}}
+        </label>
+      {{/each}}
+    </div>
+  </div>
+</div>

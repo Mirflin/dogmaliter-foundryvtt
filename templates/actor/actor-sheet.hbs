@@ -5,7 +5,56 @@
   <header class="r20-header">
     <input class="r20-name" name="name" type="text" value="{{actor.name}}"
            placeholder="{{localize 'DOGMALITER.Sheet.NamePlaceholder'}}" spellcheck="false"/>
+    {{#if editable}}
+      <button type="button" class="r20-button" data-action="stat-roll">
+        <i class="fas fa-dice-d20"></i> {{localize 'DOGMALITER.StatRoll.Button'}}
+      </button>
+    {{/if}}
   </header>
+
+  {{!-- Resources: health, mana, AP. Each can be switched off (the checkbox);
+        the selects say who sees its bar above the token, and the number on it. --}}
+  <section class="r20-resources">
+    {{#each resources as |res|}}
+      <div class="r20-resource {{#unless res.enabled}}is-off{{/unless}}" data-resource="{{res.key}}"
+           style="--r20-resource-color: {{res.color}}">
+        <div class="r20-resource-head">
+          {{#if @root.editable}}
+            <label class="r20-resource-toggle" data-tooltip="{{localize 'DOGMALITER.Sheet.ResourceEnabled'}}">
+              <input type="checkbox" name="system.{{res.key}}.enabled" {{checked res.enabled}}/>
+              <span class="r20-label">{{localize res.label}}</span>
+            </label>
+          {{else}}
+            <span class="r20-label">{{localize res.label}}</span>
+          {{/if}}
+        </div>
+        {{#if res.enabled}}
+          <div class="r20-resource-values">
+            <input type="number" name="system.{{res.key}}.value" value="{{res.value}}" data-dtype="Number" step="any"
+                   aria-label="{{localize res.label}}" {{#unless @root.editable}}disabled{{/unless}}/>
+            <span class="r20-attr-slash" aria-hidden="true">/</span>
+            <input type="number" name="system.{{res.key}}.max" value="{{res.max}}" data-dtype="Number" step="any"
+                   aria-label="{{localize 'DOGMALITER.Sheet.AttributeMax'}}" {{#unless @root.editable}}disabled{{/unless}}/>
+          </div>
+          <div class="r20-resource-bar"><span style="width: {{res.pct}}%"></span></div>
+          {{#if @root.editable}}
+            <label class="r20-resource-view" data-tooltip="{{localize 'DOGMALITER.Sheet.ShowBarHint'}}">
+              <i class="fas fa-bars-progress" aria-hidden="true"></i>
+              <select name="system.{{res.key}}.showBar" aria-label="{{localize 'DOGMALITER.Sheet.ShowBar'}}">
+                {{selectOptions @root.viewerChoices selected=res.showBar localize=true}}
+              </select>
+            </label>
+            <label class="r20-resource-view" data-tooltip="{{localize 'DOGMALITER.Sheet.ShowValueHint'}}">
+              <i class="fas fa-hashtag" aria-hidden="true"></i>
+              <select name="system.{{res.key}}.showValue" aria-label="{{localize 'DOGMALITER.Sheet.ShowValue'}}">
+                {{selectOptions @root.viewerChoices selected=res.showValue localize=true}}
+              </select>
+            </label>
+          {{/if}}
+        {{/if}}
+      </div>
+    {{/each}}
+  </section>
 
   <nav class="sheet-tabs tabs r20-tabs" data-group="primary">
     <a class="item" data-tab="main">{{localize 'DOGMALITER.Sheet.TabMain'}}</a>

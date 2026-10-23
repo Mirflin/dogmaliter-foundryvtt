@@ -1,0 +1,105 @@
+{{!-- GM panel, Sounds page: module/apps/gm-panel.mjs. A binding row's fields
+      carry the binding's field names; any change saves the row. --}}
+<section class="dl-tab {{#if active}}active{{/if}}" data-tab="sounds">
+
+  {{#if board.length}}
+    <div class="dl-card">
+      <h3 class="dl-card-title"><i class="fa-solid fa-bolt" inert></i> {{localize 'DOGMALITER.Panel.Board'}}</h3>
+      <div class="dl-board">
+        {{#each board as |button|}}
+          <button type="button" class="dl-button dl-board-button" data-action="bindingTest" data-binding-id="{{button.id}}">
+            <i class="fa-solid fa-volume-high" inert></i> {{button.label}}
+          </button>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+
+  <div class="dl-card">
+    <h3 class="dl-card-title"><i class="fa-solid fa-link" inert></i> {{localize 'DOGMALITER.Panel.Bindings'}}</h3>
+    <p class="dl-hint">{{localize 'DOGMALITER.Panel.BindingsHint'}}</p>
+
+    {{#each bindings as |binding|}}
+      <div class="dl-binding" data-binding-id="{{binding.id}}">
+        <div class="dl-binding-row">
+          <select name="trigger" data-change="binding" aria-label="{{localize 'DOGMALITER.Panel.Trigger'}}">
+            {{selectOptions @root.triggerChoices selected=binding.trigger localize=true}}
+          </select>
+          <input type="text" name="filter" value="{{binding.filter}}" data-change="binding" spellcheck="false"
+                 placeholder="{{#if binding.hasFilter}}{{localize binding.filterLabel}}{{/if}}"
+                 aria-label="{{#if binding.hasFilter}}{{localize binding.filterLabel}}{{/if}}"
+                 {{#unless binding.hasFilter}}disabled{{/unless}}/>
+          <select name="audience" data-change="binding" aria-label="{{localize 'DOGMALITER.Panel.Audience'}}">
+            {{selectOptions @root.audienceChoices selected=binding.audience localize=true}}
+          </select>
+          <button type="button" class="dl-icon-button" data-action="bindingDelete"
+                  data-tooltip="{{localize 'DOGMALITER.Panel.DeleteBinding'}}" aria-label="{{localize 'DOGMALITER.Panel.DeleteBinding'}}">
+            <i class="fa-solid fa-trash" inert></i>
+          </button>
+        </div>
+        <div class="dl-binding-row">
+          <input type="text" name="sound" value="{{binding.sound}}" data-change="binding" spellcheck="false"
+                 placeholder="{{localize 'DOGMALITER.Panel.SoundFile'}}" aria-label="{{localize 'DOGMALITER.Panel.SoundFile'}}"/>
+          <button type="button" class="dl-icon-button" data-action="bindingPick"
+                  data-tooltip="{{localize 'DOGMALITER.Panel.PickFile'}}" aria-label="{{localize 'DOGMALITER.Panel.PickFile'}}">
+            <i class="fa-solid fa-file-audio" inert></i>
+          </button>
+          <input type="range" name="volume" min="0" max="1" step="0.05" value="{{binding.volume}}" data-change="binding"
+                 data-tooltip="{{localize 'DOGMALITER.Panel.Volume'}}" aria-label="{{localize 'DOGMALITER.Panel.Volume'}}"/>
+          <select name="macro" data-change="binding" aria-label="{{localize 'DOGMALITER.Panel.Macro'}}">
+            {{selectOptions @root.macroChoices selected=binding.macro blank=(localize 'DOGMALITER.Panel.NoMacro')}}
+          </select>
+          <button type="button" class="dl-icon-button" data-action="bindingTest"
+                  data-tooltip="{{localize 'DOGMALITER.Panel.TestBinding'}}" aria-label="{{localize 'DOGMALITER.Panel.TestBinding'}}">
+            <i class="fa-solid fa-play" inert></i>
+          </button>
+        </div>
+      </div>
+    {{else}}
+      <p class="dl-empty">{{localize 'DOGMALITER.Panel.NoBindings'}}</p>
+    {{/each}}
+
+    <button type="button" class="dl-button" data-action="bindingAdd">
+      <i class="fa-solid fa-plus" inert></i> {{localize 'DOGMALITER.Panel.AddBinding'}}
+    </button>
+  </div>
+
+  <div class="dl-card">
+    <h3 class="dl-card-title">
+      <i class="fa-solid fa-shoe-prints" inert></i> {{localize 'DOGMALITER.Panel.Footsteps'}}
+      <span class="dl-title-actions">
+        <button type="button" class="dl-toggle {{#if footstepsEnabled}}is-on{{/if}}" data-action="footstepsEnabled"
+                aria-pressed="{{footstepsEnabled}}">
+          <span class="dl-switch" aria-hidden="true"></span> {{localize 'DOGMALITER.Panel.FootstepsOn'}}
+        </button>
+      </span>
+    </h3>
+    <ol class="dl-list">
+      {{#each footsteps as |step|}}
+        <li class="dl-list-row" data-behavior-uuid="{{step.uuid}}">
+          <span class="dl-grow">
+            <strong>{{step.regionName}}</strong> <span class="dl-muted">{{step.name}}</span><br/>
+            <code class="dl-path">{{#if step.src}}{{step.src}}{{else}}{{localize 'DOGMALITER.Panel.NoSound'}}{{/if}}</code>
+            {{#if step.wildcard}}<span class="dl-tag">{{localize 'DOGMALITER.Panel.FileCount'}}: {{step.count}}</span>{{/if}}
+          </span>
+          {{#if step.wildcard}}
+            <button type="button" class="dl-icon-button" data-action="footstepRefresh"
+                    data-tooltip="{{localize 'DOGMALITER.Panel.RefreshFiles'}}" aria-label="{{localize 'DOGMALITER.Panel.RefreshFiles'}}">
+              <i class="fa-solid fa-rotate" inert></i>
+            </button>
+          {{/if}}
+          <button type="button" class="dl-icon-button" data-action="footstepOpen"
+                  data-tooltip="{{localize 'DOGMALITER.Panel.Configure'}}" aria-label="{{localize 'DOGMALITER.Panel.Configure'}}">
+            <i class="fa-solid fa-gear" inert></i>
+          </button>
+          <button type="button" class="dl-toggle dl-toggle--bare {{#if step.on}}is-on{{/if}}" data-action="footstepToggle"
+                  aria-pressed="{{step.on}}" aria-label="{{step.regionName}}">
+            <span class="dl-switch" aria-hidden="true"></span>
+          </button>
+        </li>
+      {{else}}
+        <li class="dl-empty">{{localize 'DOGMALITER.Panel.NoFootsteps'}}</li>
+      {{/each}}
+    </ol>
+  </div>
+</section>

@@ -10,5 +10,7 @@ export const preloadHandlebarsTemplates = async function () {
   return load([
     // Item partials
     'systems/dogmaliter/templates/item/parts/item-effects.hbs',
+    // GM panel partials
+    'systems/dogmaliter/templates/apps/gm-panel/actor-card.hbs',
   ]);
 };

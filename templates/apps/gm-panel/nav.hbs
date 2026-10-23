@@ -1,0 +1,8 @@
+{{!-- GM panel page tabs: module/apps/gm-panel.mjs. --}}
+<nav class="dl-panel-tabs">
+  {{#each tabs as |tab|}}
+    <a class="dl-panel-tab {{#if tab.active}}active{{/if}}" data-action="panelTab" data-tab="{{tab.id}}">
+      <i class="{{tab.icon}}" inert></i> {{localize tab.label}}
+    </a>
+  {{/each}}
+</nav>
