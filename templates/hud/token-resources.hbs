@@ -1,0 +1,22 @@
+{{!-- The selected token's resources above the hotbar: module/apps/token-resources.mjs. --}}
+<header class="dl-tr-head">
+  {{#if img}}<img src="{{img}}" alt=""/>{{/if}}
+  <span class="dl-tr-name">{{name}}</span>
+  {{#if others}}<span class="dl-tr-others">+{{others}}</span>{{/if}}
+</header>
+{{#each resources as |res|}}
+  <div class="dl-tr-res" data-resource="{{res.key}}" style="--dl-tr-color: {{res.color}}">
+    <span class="dl-tr-label">{{localize res.label}}</span>
+    <div class="dl-tr-controls">
+      <button type="button" data-step="-1" data-tooltip="{{localize 'DOGMALITER.TokenResources.Minus'}}"
+              aria-label="{{localize 'DOGMALITER.TokenResources.Minus'}}"><i class="fa-solid fa-minus" inert></i></button>
+      <input type="text" data-field="value" value="{{res.value}}" spellcheck="false" aria-label="{{localize res.label}}"/>
+      <span class="dl-tr-slash">/</span>
+      <input type="text" data-field="max" class="dl-tr-max" value="{{res.max}}" spellcheck="false"
+             aria-label="{{localize 'DOGMALITER.Sheet.AttributeMax'}}"/>
+      <button type="button" data-step="1" data-tooltip="{{localize 'DOGMALITER.TokenResources.Plus'}}"
+              aria-label="{{localize 'DOGMALITER.TokenResources.Plus'}}"><i class="fa-solid fa-plus" inert></i></button>
+    </div>
+    <div class="dl-tr-bar"><span style="width: {{res.pct}}%"></span></div>
+  </div>
+{{/each}}

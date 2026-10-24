@@ -26,6 +26,7 @@
 import { SYSTEM_ID, panelView } from '../helpers/settings.mjs';
 import { blankBinding, getBindings, runBinding, setBindings } from '../audio/triggers.mjs';
 import { FOOTSTEPS, footstepBehaviors } from '../audio/footsteps.mjs';
+import { ensureStatRollMacro, resetStatRollMacro, statRollMacro } from '../rolls/stat-roll.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -183,6 +184,8 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       bindingPick: DogmaLiterGmPanel.#onBindingPick,
       bindingTest: DogmaLiterGmPanel.#onBindingTest,
       viewAttributes: DogmaLiterGmPanel.#onViewAttributes,
+      statMacroOpen: DogmaLiterGmPanel.#onStatMacroOpen,
+      statMacroReset: DogmaLiterGmPanel.#onStatMacroReset,
       templateAdd: DogmaLiterGmPanel.#onTemplateAdd,
       templateDelete: DogmaLiterGmPanel.#onTemplateDelete,
       templateApply: DogmaLiterGmPanel.#onTemplateApply,
@@ -376,6 +379,7 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       })),
       viewAuto: view.attributes === null,
       defaultAttributes: game.settings.get(SYSTEM_ID, 'defaultAttributes'),
+      statMacro: statRollMacro()?.name ?? null,
       players,
       online: users.filter((user) => user.active).length,
       tokens,
@@ -827,6 +831,26 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     const all = target.dataset.all === '1';
     const names = all ? [...this.element.querySelectorAll('[data-view-attribute]')].map((input) => input.dataset.viewAttribute) : [];
     this.#saveView(names);
+  }
+
+  /* -------------------------------------------- */
+  /*  Actions: the stat check macro               */
+  /* -------------------------------------------- */
+
+  /** Open the stat check macro in Foundry's macro editor (creating it if the world has none). */
+  static async #onStatMacroOpen() {
+    (await ensureStatRollMacro())?.sheet.render(true);
+  }
+
+  /** Put the system's starting text back into the macro, after asking. */
+  static async #onStatMacroReset() {
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize('DOGMALITER.Panel.StatMacroReset') },
+      content: `<p>${game.i18n.localize('DOGMALITER.Panel.StatMacroResetConfirm')}</p>`,
+    });
+    if (!confirmed) return;
+    await resetStatRollMacro();
+    ui.notifications.info(game.i18n.localize('DOGMALITER.Panel.StatMacroResetDone'));
   }
 
   /* -------------------------------------------- */

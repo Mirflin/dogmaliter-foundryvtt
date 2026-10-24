@@ -90,14 +90,20 @@ A new character or NPC starts with the attributes of a list the GM edits on the 
 
 ## Stat check
 
-The "throw_stat" macro, built in. The **Roll** button in the actor sheet's header opens it for that actor; in a macro, `game.dogmaliter.rollStat()` opens it for the selected token (or your own character).
+The "throw_stat" macro, as a **macro of the world the GM can edit in Foundry**: "Бросок характеристики" in the Macro Directory (the active GM's client creates it once, from `macros/stat-roll.js`). The **Roll** button in the actor sheet's header runs it for that actor; so does `game.dogmaliter.rollStat()`, and the macro itself on the hotbar (for the selected token, or your own character). Its text, comments and messages are in Russian.
 
 - Pick a stat and its multiplier: `floor(((multiplier + d20) / 10) * stat)`.
 - Tick **Attack** for an attack: pick the attack type and the hit multiplier. A second d20 + the hit multiplier sets the distance: 13+ middle, 10+ near, below that a miss.
 - **Фехтование** crits when the stat d20 reaches the actor's **Шанс крита**: the result is doubled and the threshold goes back to 20. Every fencing attack that does not crit lowers it by 1, down to 13. Any other attack puts it back to 20.
-- The attack types, the attributes left out of the list, the crit attribute and the numbers are in `CONFIG.DOGMALITER.statRoll` (`module/helpers/config.mjs`).
+- The attack types, the attributes left out of the list (Заметность among them), the crit attribute and the numbers are constants at the top of the macro.
+- Players may run the macro (Limited permission), not change it.
+- GM panel -> Players -> "Stat check": open the macro, or put the system's original text back. A new version of the system never overwrites the world's macro. With no macro in the world (deleted), the original text runs as it is.
 
-A character with no attack attributes can still roll a stat (the macro refused); "Attack" is then greyed out.
+A character with no attack attributes can still roll a stat; "Attack" is then greyed out.
+
+## Selected token's resources
+
+While you have a token selected that you own, a small bar above the macro hotbar shows its health, mana and AP (those switched on): -/+ change by 1 (Shift: 5), the number field takes `12` or `-3` / `+5` (within 0 and the max), the second field is the max. With several tokens selected it shows the first and how many more there are.
 
 ## GM panel
 
@@ -150,7 +156,9 @@ A Region Behavior: draw a region, open its configuration -> **Behaviors** -> "+"
 | `module/canvas/token.mjs` | the stacked resource bars above tokens |
 | `module/documents/token.mjs` | no HUD bar for a switched-off resource |
 | `module/helpers/migration.mjs` | one-time data changes (`power` -> `mana`; the new stats in the list of new actors' attributes) |
-| `module/rolls/stat-roll.mjs` | the stat check; `templates/dialogs/stat-roll.hbs`, `templates/chat/stat-roll.hbs` |
+| `macros/stat-roll.js` | the stat check macro's original text |
+| `module/rolls/stat-roll.mjs` | the world's stat check macro: create, run, restore |
+| `module/apps/token-resources.mjs` | the selected token's resources above the hotbar; `templates/hud/token-resources.hbs` |
 | `module/apps/gm-panel.mjs` | the GM panel; `templates/apps/gm-panel/` |
 | `module/audio/triggers.mjs` | sound bindings and the events that fire them |
 | `module/audio/footsteps.mjs` | the Footsteps region behavior |

@@ -56,28 +56,7 @@
       "ShowAll": "Everyone"
     },
     "StatRoll": {
-      "Button": "Roll",
-      "Title": "Stat check — {name}",
-      "Attack": "Attack",
-      "AttackType": "Attack type",
-      "AttackMultiplier": "Hit multiplier",
-      "AttackMultiplierShort": "Attack multiplier",
-      "Ability": "Stat",
-      "AbilityMultiplier": "Stat multiplier",
-      "Roll": "Roll",
-      "Cancel": "Cancel",
-      "Distance": "Distance",
-      "DistanceMiss": "Missed",
-      "DistanceNear": "Near distance",
-      "DistanceMid": "Middle distance",
-      "Crit": "CRIT",
-      "Die": "Stat die",
-      "NoToken": "Select your character's token first.",
-      "NoStats": "This character has no stats.",
-      "NoAttacks": "This character has no attack stats.",
-      "BadMultiplier": "Invalid multiplier.",
-      "NoAbility": "Stat not found.",
-      "NoAttack": "Attack type not found."
+      "Button": "Roll"
     },
     "Trigger": {
       "manual": "Panel button",
@@ -260,12 +239,23 @@
       "ViewAttributes": "Attributes",
       "ViewAll": "All",
       "ViewNone": "None",
-      "ViewAutoHint": "Until you pick some, the attributes with a max are shown. This choice is yours: another GM has their own."
+      "ViewAutoHint": "Until you pick some, the attributes with a max are shown. This choice is yours: another GM has their own.",
+      "StatMacro": "Stat check",
+      "StatMacroHint": "The sheet's \"Roll\" button runs this world's \"Бросок характеристики\" macro. Edit it in Foundry's macro editor; players may run it but not change it.",
+      "StatMacroOpen": "Open the macro",
+      "StatMacroCreate": "Create the macro",
+      "StatMacroReset": "Restore the original",
+      "StatMacroResetConfirm": "Replace the text of the \"Бросок характеристики\" macro with the system's original? Your changes to it will be lost.",
+      "StatMacroResetDone": "The stat check macro has been restored."
     },
     "Resource": {
       "health": "Health",
       "mana": "Mana",
       "ap": "AP"
+    },
+    "TokenResources": {
+      "Minus": "−1 (Shift: −5)",
+      "Plus": "+1 (Shift: +5)"
     }
   },
   "TYPES": {

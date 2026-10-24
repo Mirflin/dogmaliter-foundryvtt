@@ -3,6 +3,7 @@ import { DogmaLiterActor } from './documents/actor.mjs';
 import { DogmaLiterItem } from './documents/item.mjs';
 import { DogmaLiterTokenDocument } from './documents/token.mjs';
 import { registerTokenBars } from './canvas/token.mjs';
+import { registerTokenResources } from './apps/token-resources.mjs';
 // Import sheet classes.
 import { DogmaLiterActorSheet } from './sheets/actor-sheet.mjs';
 import { DogmaLiterItemSheet } from './sheets/item-sheet.mjs';
@@ -13,7 +14,7 @@ import { registerEditorFonts } from './helpers/fonts.mjs';
 import { registerSettings } from './helpers/settings.mjs';
 import { migrateWorld } from './helpers/migration.mjs';
 // The stat check, sound bindings, footsteps, the GM panel.
-import { rollStat } from './rolls/stat-roll.mjs';
+import { ensureStatRollMacro, rollStat } from './rolls/stat-roll.mjs';
 import { fireTrigger, registerTriggerHooks } from './audio/triggers.mjs';
 import { registerFootsteps } from './audio/footsteps.mjs';
 import { gmPanel, registerGmPanelControls, registerGmPanelHooks } from './apps/gm-panel.mjs';
@@ -59,6 +60,8 @@ Hooks.once('init', function () {
   CONFIG.Token.documentClass = DogmaLiterTokenDocument;
   // Health / mana / AP bars stacked above the token.
   registerTokenBars();
+  // The selected token's resources above the hotbar.
+  registerTokenResources();
 
   // Active Effects are never copied to the Actor,
   // but will still apply to the Actor from within the Item
@@ -108,6 +111,8 @@ Hooks.once('ready', function () {
   registerTriggerHooks();
   registerGmPanelHooks();
   migrateWorld();
+  // The editable stat check macro, made once per world.
+  if (game.users.activeGM?.isSelf) ensureStatRollMacro();
 });
 
 /* -------------------------------------------- */

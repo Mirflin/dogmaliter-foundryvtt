@@ -40,6 +40,22 @@
     <p class="dl-hint">{{localize 'DOGMALITER.Panel.AttributeEditHint'}}</p>
   </details>
 
+  {{!-- The stat check: a macro of this world the GM edits in Foundry (module/rolls/stat-roll.mjs). --}}
+  <div class="dl-card">
+    <h3 class="dl-card-title"><i class="fa-solid fa-dice-d20" inert></i> {{localize 'DOGMALITER.Panel.StatMacro'}}</h3>
+    <p class="dl-hint">{{localize 'DOGMALITER.Panel.StatMacroHint'}}</p>
+    <div class="dl-row dl-row--wrap">
+      <button type="button" class="dl-button dl-button--small" data-action="statMacroOpen">
+        <i class="fa-solid fa-code" inert></i> {{#if statMacro}}{{localize 'DOGMALITER.Panel.StatMacroOpen'}}{{else}}{{localize 'DOGMALITER.Panel.StatMacroCreate'}}{{/if}}
+      </button>
+      {{#if statMacro}}
+        <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="statMacroReset">
+          <i class="fa-solid fa-rotate-left" inert></i> {{localize 'DOGMALITER.Panel.StatMacroReset'}}
+        </button>
+      {{/if}}
+    </div>
+  </div>
+
   {{!-- The attributes every new actor starts with (the defaultAttributes setting). --}}
   <details class="dl-card dl-template" data-sync="template">
     <summary class="dl-card-title"><i class="fa-solid fa-list-check" inert></i> {{localize 'DOGMALITER.Panel.Template'}}

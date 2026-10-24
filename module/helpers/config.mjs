@@ -34,29 +34,6 @@ DOGMALITER.defaultAttributes = [
 ];
 
 /**
- * The stat check (module/rolls/stat-roll.mjs). Attributes are found by the
- * name shown on the sheet, the same way `actor.findAttribute` does.
- */
-DOGMALITER.statRoll = {
-  /** Attributes offered as the attack type, not as a stat. */
-  attackNames: ['Ударная сила', 'Фехтование', 'Владение', 'Меткость'],
-  /** Attributes left out of the stat list altogether. */
-  hiddenNames: ['Заметность', 'Класс брони', 'Очки движения', 'Время путешествия', 'Регенерация', 'Шанс крита'],
-  /** The attack type that can crit. */
-  fencingName: 'Фехтование',
-  /** The attribute holding the crit threshold: a d20 at or above it crits. */
-  critName: 'Шанс крита',
-  /** The threshold a crit, or any other attack, resets it to. */
-  critReset: 20,
-  /** Each fencing attack that does not crit lowers the threshold by one, down to this. */
-  critFloor: 13,
-  /** A distance roll at or above this is "middle distance"... */
-  distanceMid: 13,
-  /** ...at or above this "near distance"; below it the attack misses. */
-  distanceNear: 10,
-};
-
-/**
  * What a sound binding can be tied to (module/audio/triggers.mjs). `filter`
  * is the label of the binding's "which one" field, for triggers that have
  * one: the attribute, the attack type, the character. Empty there = any.

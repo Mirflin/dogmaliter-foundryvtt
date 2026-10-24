@@ -1824,3 +1824,128 @@
   align-items: center;
   gap: 6px;
 }
+.dogmaliter.dl-token-resources {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  margin: 0 0 6px;
+  padding: 6px 8px;
+  background: rgba(27, 31, 34, 0.92);
+  border: 1px solid #37424a;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  color: #dce4e8;
+  font-family: "Roboto", sans-serif;
+  pointer-events: auto;
+}
+.dogmaliter.dl-token-resources *,
+.dogmaliter.dl-token-resources *::before,
+.dogmaliter.dl-token-resources *::after {
+  box-sizing: border-box;
+}
+.dogmaliter .dl-tr-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  max-width: 76px;
+}
+.dogmaliter .dl-tr-head img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border: none;
+}
+.dogmaliter .dl-tr-name {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dogmaliter .dl-tr-others {
+  color: #8c9ba4;
+  font-size: 10px;
+}
+.dogmaliter .dl-tr-res {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 150px;
+  padding: 4px 6px;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-top: 2px solid var(--dl-tr-color, #16a3a8);
+  border-radius: 4px;
+}
+.dogmaliter .dl-tr-label {
+  color: #8c9ba4;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dogmaliter .dl-tr-controls {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.dogmaliter .dl-tr-controls input[type=text] {
+  width: 48px;
+  height: 24px;
+  margin: 0;
+  padding: 2px 4px;
+  background: #1b1f22;
+  border: 1px solid #37424a;
+  border-radius: 3px;
+  color: #dce4e8;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.dogmaliter .dl-tr-controls input[type=text]:focus {
+  border-color: var(--dl-tr-color, #16a3a8);
+  outline: none;
+}
+.dogmaliter .dl-tr-controls .dl-tr-max {
+  width: 40px;
+  color: #8c9ba4;
+  font-size: 12px;
+  font-weight: 400;
+}
+.dogmaliter .dl-tr-controls button {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  background: #2b3338;
+  border: 1px solid #37424a;
+  border-radius: 3px;
+  color: #dce4e8;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dogmaliter .dl-tr-controls button:hover, .dogmaliter .dl-tr-controls button:focus-visible {
+  border-color: var(--dl-tr-color, #16a3a8);
+  box-shadow: none;
+  outline: none;
+}
+.dogmaliter .dl-tr-slash {
+  color: #8c9ba4;
+}
+.dogmaliter .dl-tr-bar {
+  height: 4px;
+  overflow: hidden;
+  background: #1b1f22;
+  border-radius: 2px;
+}
+.dogmaliter .dl-tr-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--dl-tr-color, #16a3a8);
+}

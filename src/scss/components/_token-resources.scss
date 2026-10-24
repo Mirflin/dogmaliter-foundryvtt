@@ -1,0 +1,145 @@
+// The selected token's resources above the macro hotbar
+// (module/apps/token-resources.mjs), in the actor sheet's colours.
+
+&.dl-token-resources {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  margin: 0 0 6px;
+  padding: 6px 8px;
+  background: rgba($r20-bg, 0.92);
+  border: 1px solid $r20-line;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  color: $r20-text;
+  font-family: $font-primary;
+  pointer-events: auto;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+.dl-tr-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  max-width: 76px;
+
+  img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border: none;
+  }
+}
+
+.dl-tr-name {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dl-tr-others {
+  color: $r20-muted;
+  font-size: 10px;
+}
+
+.dl-tr-res {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 150px;
+  padding: 4px 6px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-top: 2px solid var(--dl-tr-color, #{$r20-cyan});
+  border-radius: 4px;
+}
+
+.dl-tr-label {
+  color: $r20-muted;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dl-tr-controls {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+
+  input[type='text'] {
+    width: 48px;
+    height: 24px;
+    margin: 0;
+    padding: 2px 4px;
+    background: $r20-bg;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+
+    &:focus {
+      border-color: var(--dl-tr-color, #{$r20-cyan});
+      outline: none;
+    }
+  }
+
+  .dl-tr-max {
+    width: 40px;
+    color: $r20-muted;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  button {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    padding: 0;
+    background: $r20-panel-2;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--dl-tr-color, #{$r20-cyan});
+      box-shadow: none;
+      outline: none;
+    }
+  }
+}
+
+.dl-tr-slash {
+  color: $r20-muted;
+}
+
+.dl-tr-bar {
+  height: 4px;
+  overflow: hidden;
+  background: $r20-bg;
+  border-radius: 2px;
+
+  > span {
+    display: block;
+    height: 100%;
+    background: var(--dl-tr-color, #{$r20-cyan});
+  }
+}
