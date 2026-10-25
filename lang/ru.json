@@ -379,7 +379,12 @@
       "OnCooldown": "«{name}» в откате: ещё {turns} х.",
       "LogCooldown": "{name}: откат {turns} х.",
       "CopiesUpdated": "Навык «{name}» обновлён у персонажей: {count}.",
-      "NoneInBar": "Навыков нет"
+      "NoneInBar": "Навыков нет",
+      "Sound": "Звук при использовании",
+      "SoundPlaceholder": "Файл звука — слышат все; пусто — без звука",
+      "PickSound": "Выбрать звук",
+      "TestSound": "Прослушать (только вам)",
+      "Volume": "Громкость"
     }
   },
   "TYPES": {

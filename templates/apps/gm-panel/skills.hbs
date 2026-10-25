@@ -50,6 +50,22 @@
       <span class="dl-hint dl-grow">{{localize 'DOGMALITER.Skills.CooldownHint'}}</span>
     </div>
 
+    <div class="dl-row">
+      <span class="dl-label">{{localize 'DOGMALITER.Skills.Sound'}}</span>
+      <input type="text" class="dl-grow" data-draft="sound" value="{{draft.sound}}" spellcheck="false"
+             placeholder="{{localize 'DOGMALITER.Skills.SoundPlaceholder'}}" aria-label="{{localize 'DOGMALITER.Skills.Sound'}}"/>
+      <button type="button" class="dl-icon-button" data-action="skillSoundPick"
+              data-tooltip="{{localize 'DOGMALITER.Skills.PickSound'}}" aria-label="{{localize 'DOGMALITER.Skills.PickSound'}}">
+        <i class="fa-solid fa-file-audio" inert></i>
+      </button>
+      <input type="range" class="dl-skill-volume" min="0" max="1" step="0.05" data-draft="soundVolume" value="{{draft.soundVolume}}"
+             data-tooltip="{{localize 'DOGMALITER.Skills.Volume'}}" aria-label="{{localize 'DOGMALITER.Skills.Volume'}}"/>
+      <button type="button" class="dl-icon-button" data-action="skillSoundTest"
+              data-tooltip="{{localize 'DOGMALITER.Skills.TestSound'}}" aria-label="{{localize 'DOGMALITER.Skills.TestSound'}}">
+        <i class="fa-solid fa-play" inert></i>
+      </button>
+    </div>
+
     <div class="dl-skill-block">
       <span class="dl-label">{{localize 'DOGMALITER.Skills.Cost'}}</span>
       {{#each draft.cost as |cost|}}
@@ -145,6 +161,7 @@
         </div>
         <div class="dl-skill-meta">
           {{#each skill.tags as |tag|}}<span class="dl-tag">{{tag}}</span>{{/each}}
+          {{#if skill.sound}}<span class="dl-skill-chip" data-tooltip="{{skill.sound}}"><i class="fa-solid fa-volume-high" inert></i></span>{{/if}}
           {{#if skill.cooldown}}<span class="dl-skill-chip"><i class="fa-solid fa-hourglass-half" inert></i> {{skill.cooldown}}</span>{{/if}}
           {{#if skill.roll}}<span class="dl-skill-chip dl-skill-chip--roll"><i class="fa-solid fa-dice-d20" inert></i> {{skill.roll}}</span>{{/if}}
           {{#each skill.costs as |cost|}}<span class="dl-skill-chip dl-skill-chip--cost"><i class="fa-solid fa-coins" inert></i> {{cost}}</span>{{/each}}

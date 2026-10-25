@@ -26,7 +26,7 @@
 import { SYSTEM_ID, panelView } from '../helpers/settings.mjs';
 import { clearLog, getLog } from '../rules/action-log.mjs';
 import { SKILL_IMG, allSkills, cooldownLabel, costLabel, costs, ensurePack, giveSkill, requirementLabel, requirements, rollLabel } from '../rules/skills.mjs';
-import { blankBinding, getBindings, runBinding, setBindings } from '../audio/triggers.mjs';
+import { blankBinding, getBindings, playSound, runBinding, setBindings } from '../audio/triggers.mjs';
 import { FOOTSTEPS, footstepBehaviors } from '../audio/footsteps.mjs';
 import { SYSTEM_MACROS, ensureSystemMacro, isSystemMacro, resetSystemMacro, systemMacro } from '../rolls/system-macros.mjs';
 
@@ -87,6 +87,7 @@ function regionsAt(scene, point) {
 /** A skill being made or edited on the Skills page; `uuid` set when editing one. */
 const blankSkillDraft = () => ({
   uuid: null, name: '', img: SKILL_IMG, description: '', tags: '', cost: [], requirements: [], roll: '', askMultiplier: false, cooldown: 0,
+  sound: '', soundVolume: 0.8,
 });
 
 /** Plain text (the draft's description) as HTML paragraphs, and back. */
@@ -212,6 +213,8 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       skillDelete: DogmaLiterGmPanel.#onSkillDelete,
       skillGive: DogmaLiterGmPanel.#onSkillGive,
       skillImgPick: DogmaLiterGmPanel.#onSkillImgPick,
+      skillSoundPick: DogmaLiterGmPanel.#onSkillSoundPick,
+      skillSoundTest: DogmaLiterGmPanel.#onSkillSoundTest,
       footstepsEnabled: DogmaLiterGmPanel.#onFootstepsEnabled,
       footstepToggle: DogmaLiterGmPanel.#onFootstepToggle,
       footstepOpen: DogmaLiterGmPanel.#onFootstepOpen,
@@ -462,6 +465,7 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
         requirements: requirements(item).map(requirementLabel),
         roll: rollLabel(item),
         cooldown: cooldownLabel(item),
+        sound: item.system.sound ?? '',
         excerpt: text.length > 160 ? `${text.slice(0, 160)}…` : text,
         search: [item.name, tags.join(' '), text].join(' '),
         tagKey: tags.map(lower).join('|'),
@@ -1009,6 +1013,8 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       roll,
       askMultiplier: !!roll && !!draft.askMultiplier,
       cooldown: Math.max(0, Math.round(Number(draft.cooldown) || 0)),
+      sound: draft.sound.trim(),
+      soundVolume: Math.clamp(Number(draft.soundVolume) || 0, 0, 1),
     };
     const img = draft.img || SKILL_IMG;
     if (draft.uuid) {
@@ -1036,6 +1042,8 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       roll: item.system.roll ?? '',
       askMultiplier: !!item.system.askMultiplier,
       cooldown: Number(item.system.cooldown) || 0,
+      sound: item.system.sound ?? '',
+      soundVolume: Number(item.system.soundVolume ?? 0.8),
       description: htmlToText(item.system.description),
       tags: (item.system.tags ?? []).join(', '),
       cost: foundry.utils.deepClone(item.system.cost ?? []).map((cost) => ({ key: cost.key, name: cost.name ?? '', amount: Number(cost.amount) || 1 })),
@@ -1057,6 +1065,25 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     if (this.#skillDraft.uuid === item.uuid) this.#skillDraft = blankSkillDraft();
     await item.delete();
     this.render({ parts: ['skills'] });
+  }
+
+  /** Pick the skill's sound file. */
+  static #onSkillSoundPick() {
+    const Picker = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
+    new Picker({
+      type: 'audio',
+      current: this.#skillDraft.sound,
+      callback: (path) => {
+        this.#skillDraft.sound = path;
+        this.render({ parts: ['skills'] });
+      },
+    }).render(true);
+  }
+
+  /** Hear the skill's sound - only here, not for the players. */
+  static #onSkillSoundTest() {
+    const { sound, soundVolume } = this.#skillDraft;
+    if (sound) playSound({ sound, volume: soundVolume, audience: 'self' });
   }
 
   /** Pick the skill's picture. */

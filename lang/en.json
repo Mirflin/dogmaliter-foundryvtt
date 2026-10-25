@@ -379,7 +379,12 @@
       "OnCooldown": "\"{name}\" is on cooldown: {turns} more turns.",
       "LogCooldown": "{name}: cooldown {turns} turns",
       "CopiesUpdated": "Skill \"{name}\" updated on characters: {count}.",
-      "NoneInBar": "No skills"
+      "NoneInBar": "No skills",
+      "Sound": "Sound on use",
+      "SoundPlaceholder": "Sound file - everyone hears it; empty for none",
+      "PickSound": "Pick a sound",
+      "TestSound": "Listen (only you)",
+      "Volume": "Volume"
     }
   },
   "TYPES": {

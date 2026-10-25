@@ -12,6 +12,8 @@
  *   system.tags           [string]
  *   system.roll           a roll formula ("1d20", "2d6 + @Strength"), or empty
  *   system.askMultiplier  ask for a multiplier, added to the roll, on use
+ *   system.sound          a sound file played for everyone on use, or empty
+ *   system.soundVolume    its volume, 0-1
  *   system.cooldown       turns before it can be used again - in combat only:
  *                         used in a started combat, the copy counts down
  *                         `flags.dogmaliter.cooldown` at the start of each of
@@ -34,7 +36,7 @@
  */
 
 import * as charges from './charges.mjs';
-import { fireTrigger } from '../audio/triggers.mjs';
+import { fireTrigger, playSound } from '../audio/triggers.mjs';
 import { note as logNote } from './action-log.mjs';
 
 export const PACK_NAME = 'dogmaliter-skills';
@@ -275,6 +277,8 @@ export async function useSkill(actor, item) {
         <div class="dl-skill-card-text">${item.system.description ?? ''}</div>
       </div>`,
   });
+  // The skill's own sound, for everyone.
+  if (item.system.sound) playSound({ sound: item.system.sound, volume: item.system.soundVolume ?? 0.8, audience: 'all' });
   await fireTrigger('skill', { values: [item.name, ...tags], actor, data: { skill: item.name, tags, roll: roll?.total ?? null } });
   return true;
 }
@@ -359,6 +363,11 @@ async function clearCooldowns(actor) {
 
 /** Call at `ready`. */
 export function registerSkills() {
+  // Foundry v14 sends every client the changes to a compendium document, and a
+  // client that has not loaded that document fails on them (an error in the
+  // console). The skills are few: have them loaded from the start.
+  if (pack()?.visible) pack().getDocuments().catch(() => {});
+
   // A compendium skill changed: its copies follow (the client that changed it).
   Hooks.on('preUpdateItem', (item, changes, options) => {
     if (item.pack === PACK_ID) options.dogmaliterOldName = item.name;

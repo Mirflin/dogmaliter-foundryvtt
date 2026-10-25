@@ -2152,6 +2152,10 @@
 .dogmaliter .dl-skill-chip--roll {
   color: #e3c56b;
 }
+.dogmaliter .dl-skill-volume {
+  flex: 0 0 90px;
+  width: 90px;
+}
 .dogmaliter.dl-stat-roll-dialog .dl-stat-roll:has([name=isAttack]:not(:checked)) .dl-stat-roll-attack {
   opacity: 0.5;
   pointer-events: none;

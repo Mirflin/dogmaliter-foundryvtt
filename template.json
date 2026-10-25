@@ -65,7 +65,9 @@
       "tags": [],
       "roll": "",
       "askMultiplier": false,
-      "cooldown": 0
+      "cooldown": 0,
+      "sound": "",
+      "soundVolume": 0.8
     }
   }
 }
