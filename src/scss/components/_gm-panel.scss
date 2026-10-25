@@ -958,6 +958,18 @@
   }
 }
 
+/* A binding with neither a sound nor a macro */
+
+.dl-binding.is-empty {
+  border-color: #a8741a;
+}
+
+.dl-binding-warning {
+  margin: 6px 0 0;
+  color: #d39b35;
+  font-size: 11px;
+}
+
 /* The stat check dialog */
 
 &.dl-stat-roll-dialog .dl-stat-roll {

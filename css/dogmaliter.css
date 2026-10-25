@@ -216,6 +216,7 @@
   /* Resources on a card: the bar in the resource's colour */
   /* Attributes of new actors */
   /* Regions */
+  /* A binding with neither a sound nor a macro */
   /* The stat check dialog */
 }
 .dogmaliter .item-form {
@@ -1814,6 +1815,14 @@
   border: 1px solid #37424a;
   border-radius: 3px;
   color: #dce4e8;
+}
+.dogmaliter .dl-binding.is-empty {
+  border-color: #a8741a;
+}
+.dogmaliter .dl-binding-warning {
+  margin: 6px 0 0;
+  color: #d39b35;
+  font-size: 11px;
 }
 .dogmaliter.dl-stat-roll-dialog .dl-stat-roll:has([name=isAttack]:not(:checked)) .dl-stat-roll-attack {
   opacity: 0.5;

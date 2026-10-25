@@ -246,7 +246,8 @@
       "StatMacroCreate": "Create the macro",
       "StatMacroReset": "Restore the original",
       "StatMacroResetConfirm": "Replace the text of the \"Бросок характеристики\" macro with the system's original? Your changes to it will be lost.",
-      "StatMacroResetDone": "The stat check macro has been restored."
+      "StatMacroResetDone": "The stat check macro has been restored.",
+      "BindingEmpty": "This binding has neither a sound nor a macro: it does nothing."
     },
     "Resource": {
       "health": "Health",

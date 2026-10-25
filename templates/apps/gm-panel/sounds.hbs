@@ -20,7 +20,7 @@
     <p class="dl-hint">{{localize 'DOGMALITER.Panel.BindingsHint'}}</p>
 
     {{#each bindings as |binding|}}
-      <div class="dl-binding" data-binding-id="{{binding.id}}">
+      <div class="dl-binding {{#if binding.empty}}is-empty{{/if}}" data-binding-id="{{binding.id}}">
         <div class="dl-binding-row">
           <select name="trigger" data-change="binding" aria-label="{{localize 'DOGMALITER.Panel.Trigger'}}">
             {{selectOptions @root.triggerChoices selected=binding.trigger localize=true}}
@@ -54,6 +54,9 @@
             <i class="fa-solid fa-play" inert></i>
           </button>
         </div>
+        {{#if binding.empty}}
+          <p class="dl-binding-warning"><i class="fa-solid fa-triangle-exclamation" inert></i> {{localize 'DOGMALITER.Panel.BindingEmpty'}}</p>
+        {{/if}}
       </div>
     {{else}}
       <p class="dl-empty">{{localize 'DOGMALITER.Panel.NoBindings'}}</p>

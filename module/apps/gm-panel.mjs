@@ -227,7 +227,10 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
   refresh = foundry.utils.debounce(() => {
     if (!this.rendered) return;
     const focused = document.activeElement;
-    if (focused && this.element.contains(focused) && focused.matches('input[type="text"], textarea')) {
+    // Any field, a select too: redrawing a select whose list is open closes
+    // the list and loses the choice. A select, slider or checkbox gives the
+    // focus up once it is changed (see #onChange), so the redraw follows.
+    if (focused && this.element.contains(focused) && focused.matches('input, select, textarea')) {
       this.#refreshPending = true;
       return;
     }
@@ -390,7 +393,13 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     const triggers = CONFIG.DOGMALITER.triggers;
     const bindings = getBindings().map((binding) => {
       const trigger = triggers[binding.trigger] ?? {};
-      return { ...binding, hasFilter: !!trigger.filter, filterLabel: trigger.filter ?? '' };
+      return {
+        ...binding,
+        hasFilter: !!trigger.filter,
+        filterLabel: trigger.filter ?? '',
+        // Neither a sound nor a macro: the binding does nothing.
+        empty: !binding.sound && !binding.macro,
+      };
     });
     const macroChoices = Object.fromEntries(
       game.macros.contents.sort((a, b) => a.name.localeCompare(b.name)).map((macro) => [macro.uuid, macro.name])
@@ -496,6 +505,10 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
   async #onChange(event) {
     const input = event.target;
     const scene = this.scene;
+    // Done with it: let the redraw that waits for the focus to leave go ahead.
+    if (input.matches('select, input[type="range"], input[type="checkbox"], input[type="color"]')) {
+      queueMicrotask(() => input.blur());
+    }
     switch (input.dataset.change) {
       case 'darkness':
         return scene?.update({ 'environment.darknessLevel': Number(input.value) }, { animateDarkness: 1500 });
@@ -819,7 +832,11 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
   static #onBindingTest(event, target) {
     const id = target.closest('[data-binding-id]')?.dataset.bindingId;
     const binding = getBindings().find((b) => b.id === id);
-    if (binding) runBinding(binding, { trigger: binding.trigger, values: binding.filter ? [binding.filter] : [] });
+    if (!binding) return;
+    if (!binding.sound && !binding.macro) {
+      return ui.notifications.warn(game.i18n.localize('DOGMALITER.Panel.BindingEmpty'));
+    }
+    runBinding(binding, { trigger: binding.trigger, values: binding.filter ? [binding.filter] : [] });
   }
 
   /* -------------------------------------------- */
