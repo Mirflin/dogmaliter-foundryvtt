@@ -1,5 +1,5 @@
 /**
- * A Roll20-style character sheet, three pages:
+ * A Roll20-style character sheet, four pages:
  *
  *   Main        - the portrait, the token image, and the description in a
  *                 Word-like rich-text editor.
@@ -9,6 +9,10 @@
  *   Inventory   - every item the actor carries, with buttons to open, send
  *                 and delete each one. "Send" fires the
  *                 `dogmaliter.sendItem` hook (see `_onItemSend`).
+ *   Skills      - the actor's skills (module/rules/skills.mjs): cost,
+ *                 requirements (met or not), tags, description; "Use" pays
+ *                 and posts it. A skill dropped on the sheet - from the
+ *                 compendium, the GM panel - is added once, not twice.
  *
  * The "Roll" button in the header opens the stat check
  * (macros/stat-roll.js), "Reaction" the block / dodge macro (macros/reaction.js),
@@ -30,6 +34,8 @@
 const BaseActorSheet = foundry.appv1?.sheets?.ActorSheet ?? ActorSheet;
 /** Same move for the text editor helper. */
 const TextEditorImpl = foundry.applications?.ux?.TextEditor?.implementation ?? TextEditor;
+
+import { check as checkSkill, cooldownLabel, giveSkill, rollLabel, useSkill } from '../rules/skills.mjs';
 
 /** The description's field, which is also the name of its editor on the sheet. */
 const DESCRIPTION = 'system.biography';
@@ -77,6 +83,7 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
       all: 'DOGMALITER.Sheet.ShowAll',
     };
     context.inventory = actor.items.contents
+      .filter((item) => item.type !== 'skill')
       .sort((a, b) => (a.sort || 0) - (b.sort || 0) || a.name.localeCompare(b.name))
       .map((item) => {
         const quantity = item.system?.quantity;
@@ -89,6 +96,28 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
           quantity,
         };
       });
+    context.skills = await Promise.all(
+      actor.items.contents
+        .filter((item) => item.type === 'skill')
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(async (item) => ({
+          id: item.id,
+          name: item.name,
+          img: item.img,
+          tags: item.system.tags ?? [],
+          tagKey: (item.system.tags ?? []).map((tag) => tag.trim().toLowerCase()).join('|'),
+          search: [item.name, (item.system.tags ?? []).join(' '), item.system.description ?? ''].join(' ').replace(/<[^>]+>/g, ' '),
+          roll: rollLabel(item),
+          cooldownLabel: cooldownLabel(item),
+          ...checkSkill(actor, item),
+          description: await TextEditorImpl.enrichHTML(item.system.description ?? '', { relativeTo: item }),
+        }))
+    );
+    // The Skills page's tag filter: every tag the actor's skills have.
+    context.skillTags = [...new Set(context.skills.flatMap((skill) => skill.tags.map((tag) => tag.trim().toLowerCase())))]
+      .sort()
+      .map((tag) => ({ tag, selected: tag === this._skillTag }));
+    context.skillSearch = this._skillSearch ?? '';
     context.editable = this.isEditable;
     // What the description looks like to someone who cannot edit it: links,
     // inline rolls and the like turned into their live form.
@@ -156,6 +185,18 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
     super.activateListeners(html);
     // Anyone who can see the sheet may open an item to read it.
     html.on('click', '[data-action="item-open"]', this._onItemOpen.bind(this));
+    // The Skills page's search and tag filter: anyone who can see the sheet;
+    // they only hide rows, nothing is saved.
+    html.on('input', '[data-skill-search]', (event) => {
+      this._skillSearch = event.currentTarget.value;
+      this._filterSkills(html);
+    });
+    html.on('change', '[data-skill-tag]', (event) => {
+      event.stopPropagation();
+      this._skillTag = event.currentTarget.value;
+      this._filterSkills(html);
+    });
+    this._filterSkills(html);
     if (!this.isEditable) return;
 
     html.on('click', '[data-action="attribute-add"]', this._onAttributeAdd.bind(this));
@@ -165,6 +206,7 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
     html.on('click', '[data-action="image-remove"]', this._onImageRemove.bind(this));
     html.on('click', '[data-action="item-send"]', this._onItemSend.bind(this));
     html.on('click', '[data-action="item-delete"]', this._onItemDelete.bind(this));
+    html.on('click', '[data-action="skill-use"]', this._onSkillUse.bind(this));
     html.on('click', '[data-action="stat-roll"]', this._onStatRoll.bind(this));
     html.on('click', '[data-action="reaction-roll"]', this._onReactionRoll.bind(this));
 
@@ -266,6 +308,42 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
   /* -------------------------------------------- */
   /*  Inventory                                   */
   /* -------------------------------------------- */
+
+  /**
+   * Hide the skills that do not match the Skills page's search and tag.
+   * @param {jQuery} html
+   */
+  _filterSkills(html) {
+    const wanted = (this._skillSearch ?? '').trim().toLowerCase();
+    const tag = this._skillTag ?? '';
+    for (const row of html[0].querySelectorAll('.r20-skill[data-search-text]')) {
+      const wrongTag = !!tag && !row.dataset.tags.split('|').includes(tag);
+      row.hidden = wrongTag || (!!wanted && !row.dataset.searchText.toLowerCase().includes(wanted));
+    }
+  }
+
+  /**
+   * Use a skill: check its requirements, pay its cost, post it to chat.
+   * @param {Event} event
+   */
+  async _onSkillUse(event) {
+    event.preventDefault();
+    const item = this._inventoryItem(event);
+    if (item) await useSkill(this.actor, item);
+  }
+
+  /**
+   * @override - a skill dropped from elsewhere (the compendium, the GM panel)
+   * is given the way the panel gives it: once, and remembering its source, so
+   * changes to it reach this copy.
+   */
+  async _onDropItem(event, data) {
+    if (!this.actor.isOwner) return false;
+    const ItemImpl = getDocumentClass('Item');
+    const item = await ItemImpl.fromDropData(data);
+    if (item?.type !== 'skill' || item.parent === this.actor) return super._onDropItem(event, data);
+    return giveSkill(this.actor, item);
+  }
 
   /**
    * The item an inventory button belongs to.

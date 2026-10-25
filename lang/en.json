@@ -53,7 +53,8 @@
       "ShowValueHint": "Who sees the number (current / max) on the bar",
       "ShowNone": "Nobody",
       "ShowOwner": "Owner and GM",
-      "ShowAll": "Everyone"
+      "ShowAll": "Everyone",
+      "TabSkills": "Skills"
     },
     "StatRoll": {
       "Button": "Roll",
@@ -79,7 +80,10 @@
       "FilterActor": "Character (empty: any)",
       "FilterName": "Event name",
       "block": "Block (reaction)",
-      "dodge": "Dodge (reaction)"
+      "dodge": "Dodge (reaction)",
+      "attackHit": "Attack: hit (any distance)",
+      "skill": "Skill used",
+      "FilterSkill": "Skill or tag (empty: any)"
     },
     "Audience": {
       "all": "Everyone hears",
@@ -254,7 +258,8 @@
       "TabLog": "Log",
       "Character": "Character",
       "NoCharacterChoice": "— none —",
-      "OwnsNothing": "This player owns no actor: they can change nothing. Pick a character for them above: they become its owner."
+      "OwnsNothing": "This player owns no actor: they can change nothing. Pick a character for them above: they become its owner.",
+      "TabSkills": "Skills"
     },
     "Resource": {
       "health": "Health",
@@ -306,6 +311,75 @@
         "recoveryEnd": "recovery finished",
         "note": ""
       }
+    },
+    "Skills": {
+      "PackLabel": "Skills",
+      "NewTitle": "New skill",
+      "EditTitle": "Edit skill",
+      "Name": "Name",
+      "Description": "Description",
+      "Tags": "Tags",
+      "TagsPlaceholder": "Comma-separated: combat, magic, support",
+      "Cost": "Cost",
+      "Requirements": "Requirements",
+      "Free": "Free.",
+      "NoRequirements": "No requirements.",
+      "AddCost": "Add a cost",
+      "AddRequirement": "Add a requirement",
+      "AttributeName": "Attribute",
+      "Amount": "Amount",
+      "Min": "At least",
+      "RemoveRow": "Remove",
+      "Create": "Create skill",
+      "Save": "Save",
+      "Cancel": "Cancel",
+      "NeedName": "Give the skill a name.",
+      "Created": "Skill \"{name}\" created.",
+      "Saved": "Skill \"{name}\" saved. Characters who have it already keep their old copy.",
+      "Search": "Search by name, tag, description",
+      "AllTags": "All tags",
+      "ListHint": "Skills are kept in the world compendium \"Skills\". Drag a skill onto a character sheet, or press \"Give\".",
+      "NoneYet": "No skills yet. Create the first one above.",
+      "Give": "Give",
+      "GiveTitle": "Give skill \"{name}\"",
+      "GiveTo": "To",
+      "Given": "{actor} got the skill \"{name}\".",
+      "AlreadyHas": "{actor} already has the skill \"{name}\".",
+      "NoActors": "The world has no actors.",
+      "Edit": "Edit",
+      "Delete": "Delete skill",
+      "DeleteConfirm": "Delete the skill <strong>{name}</strong> from the compendium? Characters keep their copies.",
+      "CostAttack": "Attack charge",
+      "CostBlock": "Block charge",
+      "CostDodge": "Dodge charge",
+      "CostAttribute": "Attribute…",
+      "Use": "Use",
+      "Remove": "Remove skill",
+      "Paid": "Paid",
+      "NoneOnSheet": "No skills. The GM gives them from the GM panel or drops them on the sheet.",
+      "RequirementsNotMet": "\"{name}\": requirements not met - {list}.",
+      "CannotPay": "\"{name}\": not enough - {list}.",
+      "LogReason": "skill: {name}",
+      "SheetHint": "Cost, requirements and tags are changed on the GM panel -> Skills.",
+      "PickImage": "Pick a picture",
+      "Roll": "Roll",
+      "RollPlaceholder": "Formula: 1d20, 1d8, 2d6 + @Strength - empty for no roll",
+      "AskMultiplier": "Ask for a multiplier",
+      "RollHint": "Using the skill rolls this formula. Ticked, a window asks for a multiplier first, added to the roll. The formula can use attributes with Latin names: @Strength.",
+      "Op": "Condition",
+      "MultiplierShort": "mult.",
+      "Multiplier": "Multiplier",
+      "RollTitle": "Skill \"{name}\"",
+      "BadFormula": "\"{name}\": the roll formula \"{formula}\" is not valid.",
+      "BadMultiplier": "Invalid multiplier.",
+      "Cooldown": "Cooldown (turns)",
+      "CooldownHint": "How many of the character's turns the skill can't be used after use. In combat only; 0 for none.",
+      "CooldownTurns": "cooldown {turns} t.",
+      "CooldownLeft": "cooldown",
+      "OnCooldown": "\"{name}\" is on cooldown: {turns} more turns.",
+      "LogCooldown": "{name}: cooldown {turns} turns",
+      "CopiesUpdated": "Skill \"{name}\" updated on characters: {count}.",
+      "NoneInBar": "No skills"
     }
   },
   "TYPES": {
@@ -316,7 +390,8 @@
     "Item": {
       "item": "Item",
       "feature": "Feature",
-      "spell": "Spell"
+      "spell": "Spell",
+      "skill": "Skill"
     },
     "RegionBehavior": {
       "footsteps": "Footsteps"

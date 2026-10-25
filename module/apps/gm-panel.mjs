@@ -25,6 +25,7 @@
 
 import { SYSTEM_ID, panelView } from '../helpers/settings.mjs';
 import { clearLog, getLog } from '../rules/action-log.mjs';
+import { SKILL_IMG, allSkills, cooldownLabel, costLabel, costs, ensurePack, giveSkill, requirementLabel, requirements, rollLabel } from '../rules/skills.mjs';
 import { blankBinding, getBindings, runBinding, setBindings } from '../audio/triggers.mjs';
 import { FOOTSTEPS, footstepBehaviors } from '../audio/footsteps.mjs';
 import { SYSTEM_MACROS, ensureSystemMacro, isSystemMacro, resetSystemMacro, systemMacro } from '../rolls/system-macros.mjs';
@@ -34,12 +35,14 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const TEMPLATES = 'systems/dogmaliter/templates/apps/gm-panel';
 
 const fromUuidSyncImpl = foundry.utils.fromUuidSync ?? globalThis.fromUuidSync;
+const fromUuidImpl = foundry.utils.fromUuid ?? globalThis.fromUuid;
 
 const TABS = [
   { id: 'scene', icon: 'fa-solid fa-map', label: 'DOGMALITER.Panel.TabScene' },
   { id: 'players', icon: 'fa-solid fa-users', label: 'DOGMALITER.Panel.TabPlayers' },
   { id: 'regions', icon: 'fa-solid fa-draw-polygon', label: 'DOGMALITER.Panel.TabRegions' },
   { id: 'sounds', icon: 'fa-solid fa-volume-high', label: 'DOGMALITER.Panel.TabSounds' },
+  { id: 'skills', icon: 'fa-solid fa-book', label: 'DOGMALITER.Panel.TabSkills' },
   { id: 'log', icon: 'fa-solid fa-list-ul', label: 'DOGMALITER.Panel.TabLog' },
 ];
 
@@ -64,6 +67,7 @@ const REFRESH_HOOKS = [
   'createRegion', 'updateRegion', 'deleteRegion',
   'createRegionBehavior', 'updateRegionBehavior', 'deleteRegionBehavior',
   'createMacro', 'updateMacro', 'deleteMacro',
+  'createItem', 'updateItem', 'deleteItem',
 ];
 
 /** Pull users to a scene - Scene#pullUsers is v13+. */
@@ -78,6 +82,27 @@ function regionsAt(scene, point) {
     .filter((region) => region.polygonTree?.testPoint?.(point))
     .map((region) => region.name)
     .join(', ');
+}
+
+/** A skill being made or edited on the Skills page; `uuid` set when editing one. */
+const blankSkillDraft = () => ({
+  uuid: null, name: '', img: SKILL_IMG, description: '', tags: '', cost: [], requirements: [], roll: '', askMultiplier: false, cooldown: 0,
+});
+
+/** Plain text (the draft's description) as HTML paragraphs, and back. */
+function textToHtml(text) {
+  return String(text ?? '')
+    .split(/\n\s*\n/)
+    .map((para) => para.trim())
+    .filter(Boolean)
+    .map((para) => `<p>${foundry.utils.escapeHTML(para).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+}
+function htmlToText(html) {
+  const marked = String(html ?? '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>\s*/gi, '\n\n').replace(/<[^>]+>/g, '');
+  const decoder = document.createElement('textarea');
+  decoder.innerHTML = marked;
+  return decoder.value.trim();
 }
 
 const lower = (name) => String(name ?? '').trim().toLowerCase();
@@ -178,6 +203,15 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       panToken: DogmaLiterGmPanel.#onPanToken,
       tokenHidden: DogmaLiterGmPanel.#onTokenHidden,
       logClear: DogmaLiterGmPanel.#onLogClear,
+      skillCostAdd: DogmaLiterGmPanel.#onSkillCostAdd,
+      skillReqAdd: DogmaLiterGmPanel.#onSkillReqAdd,
+      skillRowRemove: DogmaLiterGmPanel.#onSkillRowRemove,
+      skillSave: DogmaLiterGmPanel.#onSkillSave,
+      skillCancel: DogmaLiterGmPanel.#onSkillCancel,
+      skillEdit: DogmaLiterGmPanel.#onSkillEdit,
+      skillDelete: DogmaLiterGmPanel.#onSkillDelete,
+      skillGive: DogmaLiterGmPanel.#onSkillGive,
+      skillImgPick: DogmaLiterGmPanel.#onSkillImgPick,
       footstepsEnabled: DogmaLiterGmPanel.#onFootstepsEnabled,
       footstepToggle: DogmaLiterGmPanel.#onFootstepToggle,
       footstepOpen: DogmaLiterGmPanel.#onFootstepOpen,
@@ -211,6 +245,7 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     scene: { template: `${TEMPLATES}/scene.hbs`, scrollable: [''] },
     players: { template: `${TEMPLATES}/players.hbs`, scrollable: [''] },
     regions: { template: `${TEMPLATES}/regions.hbs`, scrollable: [''] },
+    skills: { template: `${TEMPLATES}/skills.hbs`, scrollable: [''] },
     log: { template: `${TEMPLATES}/log.hbs`, scrollable: [''] },
     sounds: { template: `${TEMPLATES}/sounds.hbs`, scrollable: [''] },
   };
@@ -223,6 +258,12 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
 
   /** The Log page's kind filter: '' (all), charge, attribute, resource, note. */
   #logKind = '';
+
+  /** The skill being made or edited on the Skills page. */
+  #skillDraft = blankSkillDraft();
+
+  /** The Skills page's tag filter ('' = every tag), lower-cased. */
+  #skillTag = '';
 
   /** What is typed in each sub-page's search field. */
   #search = {};
@@ -267,6 +308,9 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
         break;
       case 'players':
         Object.assign(context, this.#playersContext());
+        break;
+      case 'skills':
+        Object.assign(context, await this.#skillsContext());
         break;
       case 'log':
         Object.assign(context, this.#logContext());
@@ -405,6 +449,43 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     };
   }
 
+  async #skillsContext() {
+    const skills = (await allSkills()).map((item) => {
+      const tags = item.system.tags ?? [];
+      const text = htmlToText(item.system.description);
+      return {
+        uuid: item.uuid,
+        name: item.name,
+        img: item.img,
+        tags,
+        costs: costs(item).map(costLabel),
+        requirements: requirements(item).map(requirementLabel),
+        roll: rollLabel(item),
+        cooldown: cooldownLabel(item),
+        excerpt: text.length > 160 ? `${text.slice(0, 160)}…` : text,
+        search: [item.name, tags.join(' '), text].join(' '),
+        tagKey: tags.map(lower).join('|'),
+        editing: item.uuid === this.#skillDraft.uuid,
+      };
+    });
+    const allTags = [...new Set(skills.flatMap((skill) => skill.tags.map(lower)))].sort();
+    const draft = this.#skillDraft;
+    return {
+      skills,
+      search: this.#search,
+      tagChoices: allTags.map((tag) => ({ tag, selected: tag === this.#skillTag })),
+      draft: {
+        ...draft,
+        editing: !!draft.uuid,
+        cost: draft.cost.map((cost, index) => ({ ...cost, index, isAttribute: cost.key === 'attribute' })),
+        requirements: draft.requirements.map((requirement, index) => ({ ...requirement, index })),
+      },
+      opChoices: CONFIG.DOGMALITER.requirementOps,
+      costChoices: Object.fromEntries(Object.entries(CONFIG.DOGMALITER.skillCosts).map(([key, { label }]) => [key, label])),
+      attributeNames: knownAttributes(this.scene).map((attribute) => attribute.name),
+    };
+  }
+
   #logContext() {
     const today = new Date().toDateString();
     const entries = getLog()
@@ -526,6 +607,19 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       const output = event.target.parentElement.querySelector('output');
       if (output) output.textContent = `${Math.round(Number(event.target.value) * 100)}%`;
     });
+    // The skill draft follows its fields as they are typed in - no redraw.
+    const followDraft = (event) => {
+      const path = event.target.dataset.draft;
+      // A field just replaced by a redraw still sends its "change": not the draft's any more.
+      if (!path || !this.element.contains(event.target)) return;
+      const { type } = event.target;
+      const value = type === 'checkbox' ? event.target.checked : type === 'number' ? Number(event.target.value) || 0 : event.target.value;
+      foundry.utils.setProperty(this.#skillDraft, path, value);
+      // A cost's kind decides whether it needs an attribute name: redraw then.
+      if (event.type === 'change' && path.endsWith('.key')) this.render({ parts: ['skills'] });
+    };
+    this.element.addEventListener('input', followDraft);
+    this.element.addEventListener('change', followDraft);
     this.element.addEventListener('input', (event) => {
       const section = event.target.dataset.search;
       if (!section) return;
@@ -543,6 +637,12 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
   _onRender(context, options) {
     super._onRender?.(context, options);
     this.#applySearch();
+    // Skills drag onto a character sheet like items from the sidebar.
+    for (const row of this.element.querySelectorAll('[data-skill-uuid][draggable]')) {
+      row.addEventListener('dragstart', (event) => {
+        event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'Item', uuid: row.dataset.skillUuid }));
+      });
+    }
   }
 
   /** Hide the list rows that do not match their sub-page's search text (name, or a region they are in). */
@@ -552,7 +652,9 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       for (const row of list.querySelectorAll('[data-search-text]')) {
         // The Log page also filters by kind.
         const wrongKind = !!this.#logKind && 'kind' in row.dataset && row.dataset.kind !== this.#logKind;
-        row.hidden = wrongKind || (!!wanted && !row.dataset.searchText.toLowerCase().includes(wanted));
+        // The Skills page also filters by tag.
+        const wrongTag = !!this.#skillTag && 'tags' in row.dataset && !row.dataset.tags.split('|').includes(this.#skillTag);
+        row.hidden = wrongKind || wrongTag || (!!wanted && !row.dataset.searchText.toLowerCase().includes(wanted));
       }
     }
   }
@@ -570,6 +672,9 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
         return scene?.update({ 'environment.darknessLevel': Number(input.value) }, { animateDarkness: 1500 });
       case 'weather':
         return scene?.update({ weather: input.value });
+      case 'skillTag':
+        this.#skillTag = input.value;
+        return this.#applySearch();
       case 'logKind':
         this.#logKind = input.value;
         return this.#applySearch();
@@ -848,6 +953,149 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
   static #onTokenHidden(event, target) {
     const token = this.scene?.tokens.get(target.dataset.tokenId);
     token?.update({ hidden: !token.hidden });
+  }
+
+  /* -------------------------------------------- */
+  /*  Actions: skills                             */
+  /* -------------------------------------------- */
+
+  static #onSkillCostAdd() {
+    this.#skillDraft.cost.push({ key: 'mana', name: '', amount: 1 });
+    this.render({ parts: ['skills'] });
+  }
+
+  static #onSkillReqAdd() {
+    this.#skillDraft.requirements.push({ name: '', op: '>=', min: 1 });
+    this.render({ parts: ['skills'] });
+  }
+
+  /** Remove a cost or requirement row (data-list: cost | requirements, data-index). */
+  static #onSkillRowRemove(event, target) {
+    this.#skillDraft[target.dataset.list]?.splice(Number(target.dataset.index), 1);
+    this.render({ parts: ['skills'] });
+  }
+
+  static #onSkillCancel() {
+    document.activeElement?.blur?.();
+    this.#skillDraft = blankSkillDraft();
+    this.render({ parts: ['skills'] });
+  }
+
+  /** Make the skill, or save the one being edited, in the compendium. */
+  static async #onSkillSave() {
+    // The field being typed in gives its last change to the draft first.
+    document.activeElement?.blur?.();
+    const draft = this.#skillDraft;
+    const name = draft.name.trim();
+    if (!name) return ui.notifications.warn(game.i18n.localize('DOGMALITER.Skills.NeedName'));
+    const roll = draft.roll.trim();
+    const RollImpl = foundry.dice?.Roll ?? Roll;
+    if (roll && !RollImpl.validate(roll)) {
+      return ui.notifications.warn(game.i18n.format('DOGMALITER.Skills.BadFormula', { name, formula: roll }));
+    }
+    const system = {
+      description: textToHtml(draft.description),
+      cost: draft.cost
+        .filter((cost) => cost.key in CONFIG.DOGMALITER.skillCosts && Number(cost.amount) > 0 && (cost.key !== 'attribute' || cost.name.trim()))
+        .map((cost) => ({ key: cost.key, name: cost.key === 'attribute' ? cost.name.trim() : '', amount: Number(cost.amount) })),
+      requirements: draft.requirements
+        .filter((requirement) => requirement.name.trim())
+        .map((requirement) => ({
+          name: requirement.name.trim(),
+          op: requirement.op in CONFIG.DOGMALITER.requirementOps ? requirement.op : '>=',
+          min: Number(requirement.min) || 0,
+        })),
+      tags: [...new Set(draft.tags.split(',').map((tag) => tag.trim()).filter(Boolean))],
+      roll,
+      askMultiplier: !!roll && !!draft.askMultiplier,
+      cooldown: Math.max(0, Math.round(Number(draft.cooldown) || 0)),
+    };
+    const img = draft.img || SKILL_IMG;
+    if (draft.uuid) {
+      const item = await fromUuidImpl(draft.uuid);
+      await item?.update({ name, img, system });
+    } else {
+      const skillPack = await ensurePack();
+      if (!skillPack) return;
+      await getDocumentClass('Item').create({ name, type: 'skill', img, system }, { pack: skillPack.collection });
+    }
+    ui.notifications.info(game.i18n.format(draft.uuid ? 'DOGMALITER.Skills.Saved' : 'DOGMALITER.Skills.Created', { name }));
+    this.#skillDraft = blankSkillDraft();
+    this.render({ parts: ['skills'] });
+  }
+
+  /** Load a skill of the compendium into the form. */
+  static async #onSkillEdit(event, target) {
+    const item = await fromUuidImpl(target.closest('[data-skill-uuid]')?.dataset.skillUuid);
+    if (!item) return;
+    document.activeElement?.blur?.();
+    this.#skillDraft = {
+      uuid: item.uuid,
+      name: item.name,
+      img: item.img || SKILL_IMG,
+      roll: item.system.roll ?? '',
+      askMultiplier: !!item.system.askMultiplier,
+      cooldown: Number(item.system.cooldown) || 0,
+      description: htmlToText(item.system.description),
+      tags: (item.system.tags ?? []).join(', '),
+      cost: foundry.utils.deepClone(item.system.cost ?? []).map((cost) => ({ key: cost.key, name: cost.name ?? '', amount: Number(cost.amount) || 1 })),
+      requirements: foundry.utils.deepClone(item.system.requirements ?? []).map((r) => ({ name: r.name ?? '', op: r.op || '>=', min: Number(r.min) || 0 })),
+    };
+    await this.render({ parts: ['skills'] });
+    this.element.querySelector('.dl-skill-form')?.setAttribute('open', '');
+    this.element.querySelector('.dl-tab[data-tab="skills"]')?.scrollTo({ top: 0 });
+  }
+
+  static async #onSkillDelete(event, target) {
+    const item = await fromUuidImpl(target.closest('[data-skill-uuid]')?.dataset.skillUuid);
+    if (!item) return;
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize('DOGMALITER.Skills.Delete') },
+      content: `<p>${game.i18n.format('DOGMALITER.Skills.DeleteConfirm', { name: foundry.utils.escapeHTML(item.name) })}</p>`,
+    });
+    if (!confirmed) return;
+    if (this.#skillDraft.uuid === item.uuid) this.#skillDraft = blankSkillDraft();
+    await item.delete();
+    this.render({ parts: ['skills'] });
+  }
+
+  /** Pick the skill's picture. */
+  static #onSkillImgPick() {
+    const Picker = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
+    new Picker({
+      type: 'image',
+      current: this.#skillDraft.img,
+      callback: (path) => {
+        this.#skillDraft.img = path;
+        this.render({ parts: ['skills'] });
+      },
+    }).render(true);
+  }
+
+  /** Give a skill to an actor picked in a dialog - players' characters first. */
+  static async #onSkillGive(event, target) {
+    const item = await fromUuidImpl(target.closest('[data-skill-uuid]')?.dataset.skillUuid);
+    if (!item) return;
+    const owners = (actor) => game.users.filter((u) => !u.isGM && actor.testUserPermission(u, 'OWNER')).map((u) => u.name);
+    const actors = game.actors.contents
+      .map((actor) => ({ actor, owners: owners(actor) }))
+      .sort((a, b) => (b.owners.length > 0) - (a.owners.length > 0) || a.actor.name.localeCompare(b.actor.name));
+    if (!actors.length) return ui.notifications.warn(game.i18n.localize('DOGMALITER.Skills.NoActors'));
+    const escape = (text) => foundry.utils.escapeHTML(String(text ?? ''));
+    const options = actors
+      .map(({ actor, owners: names }) => `<option value="${actor.id}">${escape(actor.name)}${names.length ? ` — ${escape(names.join(', '))}` : ''}</option>`)
+      .join('');
+    const actorId = await foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n.format('DOGMALITER.Skills.GiveTitle', { name: item.name }), icon: 'fa-solid fa-hand-holding' },
+      content: `<div class="form-group"><label>${escape(game.i18n.localize('DOGMALITER.Skills.GiveTo'))}</label><select name="actor">${options}</select></div>`,
+      buttons: [
+        { action: 'give', label: 'DOGMALITER.Skills.Give', icon: 'fa-solid fa-hand-holding', default: true, callback: (e, button) => button.form.elements.actor.value },
+        { action: 'cancel', label: 'DOGMALITER.Skills.Cancel', icon: 'fa-solid fa-xmark' },
+      ],
+      rejectClose: false,
+    });
+    const actor = game.actors.get(actorId);
+    if (actor) await giveSkill(actor, item);
   }
 
   /** Empty the action log, after asking. */

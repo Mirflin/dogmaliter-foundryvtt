@@ -1,0 +1,31 @@
+{{!-- A skill (module/rules/skills.mjs). Cost, requirements and tags are made on
+      the GM panel's Skills page; here they are only shown. --}}
+<form class="{{cssClass}} dl-skill-sheet" autocomplete="off">
+  <header class="sheet-header">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
+    <div class="header-fields">
+      <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="{{localize 'DOGMALITER.Skills.Name'}}"/></h1>
+    </div>
+  </header>
+
+  <section class="dl-skill-summary">
+    <p><strong>{{localize 'DOGMALITER.Skills.Cost'}}:</strong>
+      {{#each skill.costs as |cost|}}<span class="dl-skill-chip">{{cost}}</span>{{else}}<span class="dl-muted">{{localize 'DOGMALITER.Skills.Free'}}</span>{{/each}}</p>
+    <p><strong>{{localize 'DOGMALITER.Skills.Requirements'}}:</strong>
+      {{#each skill.requirements as |req|}}<span class="dl-skill-chip">{{req}}</span>{{else}}<span class="dl-muted">{{localize 'DOGMALITER.Skills.NoRequirements'}}</span>{{/each}}</p>
+    {{#if skill.cooldown}}
+      <p><strong>{{localize 'DOGMALITER.Skills.Cooldown'}}:</strong> <span class="dl-skill-chip">{{skill.cooldown}}</span></p>
+    {{/if}}
+    {{#if skill.roll}}
+      <p><strong>{{localize 'DOGMALITER.Skills.Roll'}}:</strong> <span class="dl-skill-chip">{{skill.roll}}</span></p>
+    {{/if}}
+    {{#if skill.tags.length}}
+      <p><strong>{{localize 'DOGMALITER.Skills.Tags'}}:</strong> {{#each skill.tags as |tag|}}<span class="dl-skill-chip">{{tag}}</span>{{/each}}</p>
+    {{/if}}
+    <p class="hint">{{localize 'DOGMALITER.Skills.SheetHint'}}</p>
+  </section>
+
+  <section class="sheet-body">
+    {{editor enrichedDescription target="system.description" engine="prosemirror" button=true editable=editable}}
+  </section>
+</form>

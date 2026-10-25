@@ -22,3 +22,41 @@
   @import 'components/gm-panel';
   @import 'components/token-resources';
 }
+
+/* A skill's chat card and its item sheet's summary (module/rules/skills.mjs) */
+.dl-skill-card {
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    img {
+      width: 24px;
+      height: 24px;
+      border: none;
+    }
+  }
+}
+
+.dl-skill-card-tags span,
+.dl-skill-sheet .dl-skill-chip {
+  display: inline-block;
+  margin: 0 4px 2px 0;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.dl-skill-sheet .dl-skill-summary {
+  padding: 4px 8px;
+
+  p {
+    margin: 4px 0;
+  }
+}
+
+.dl-skill-card-roll {
+  margin: 6px 0;
+}

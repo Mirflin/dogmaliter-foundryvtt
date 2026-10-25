@@ -17,6 +17,7 @@ import { migrateWorld } from './helpers/migration.mjs';
 import { rollReaction, rollStat, syncSystemMacros } from './rolls/system-macros.mjs';
 import * as charges from './rules/charges.mjs';
 import * as actionLog from './rules/action-log.mjs';
+import * as skills from './rules/skills.mjs';
 import { fireTrigger, registerTriggerHooks } from './audio/triggers.mjs';
 import { registerFootsteps } from './audio/footsteps.mjs';
 import { gmPanel, registerGmPanelControls, registerGmPanelHooks } from './apps/gm-panel.mjs';
@@ -36,6 +37,7 @@ Hooks.once('init', function () {
     rollReaction,
     charges,
     actionLog,
+    skills,
     fireTrigger,
     gmPanel,
   };
@@ -116,6 +118,7 @@ Hooks.once('ready', function () {
   registerTriggerHooks();
   charges.registerCharges();
   actionLog.registerActionLog();
+  skills.registerSkills();
   registerGmPanelHooks();
   migrateWorld();
   // The editable stat check and reaction macros: made once per world, kept

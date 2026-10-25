@@ -1,0 +1,16 @@
+{{!-- The selected token's skills, bottom left: module/apps/token-resources.mjs.
+      Two to a row, scrolling; a click uses the skill. --}}
+<header class="dl-tr-head dl-tc-head">
+  <span class="dl-tr-name">{{name}}{{#if others}} <span class="dl-tr-others">+{{others}}</span>{{/if}}</span>
+</header>
+<div class="dl-ts-grid">
+  {{#each skills as |skill|}}
+    <button type="button" class="dl-ts-skill {{#unless skill.canUse}}is-blocked{{/unless}} {{#if skill.cooldown}}is-cooling{{/if}}"
+            data-skill-id="{{skill.id}}" data-tooltip="{{skill.tooltip}}" aria-label="{{skill.name}}">
+      <img src="{{skill.img}}" alt=""/>
+      {{#if skill.cooldown}}<span class="dl-ts-cooldown">{{skill.cooldown}}</span>{{/if}}
+    </button>
+  {{else}}
+    <p class="dl-ts-empty">{{localize 'DOGMALITER.Skills.NoneInBar'}}</p>
+  {{/each}}
+</div>

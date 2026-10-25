@@ -27,6 +27,30 @@ DOGMALITER.charges = {
 };
 
 /**
+ * What using a skill can cost (module/rules/skills.mjs): a resource, a
+ * charge, or any attribute by name (`attribute`, with the cost's `name`).
+ */
+DOGMALITER.skillCosts = {
+  health: { label: 'DOGMALITER.Resource.health' },
+  mana: { label: 'DOGMALITER.Resource.mana' },
+  ap: { label: 'DOGMALITER.Resource.ap' },
+  attack: { label: 'DOGMALITER.Skills.CostAttack' },
+  block: { label: 'DOGMALITER.Skills.CostBlock' },
+  dodge: { label: 'DOGMALITER.Skills.CostDodge' },
+  attribute: { label: 'DOGMALITER.Skills.CostAttribute' },
+};
+
+/** How a skill's requirement compares the attribute with its number. */
+DOGMALITER.requirementOps = {
+  '>=': '≥',
+  '>': '>',
+  '<=': '≤',
+  '<': '<',
+  '=': '=',
+  '!=': '≠',
+};
+
+/**
  * The attributes a new actor starts with. Only the first value: the GM
  * changes the list on the GM panel (the `defaultAttributes` setting).
  */
@@ -65,9 +89,11 @@ DOGMALITER.triggers = {
   attackMiss: { label: 'DOGMALITER.Trigger.attackMiss', filter: 'DOGMALITER.Trigger.FilterAttack' },
   attackNear: { label: 'DOGMALITER.Trigger.attackNear', filter: 'DOGMALITER.Trigger.FilterAttack' },
   attackMid: { label: 'DOGMALITER.Trigger.attackMid', filter: 'DOGMALITER.Trigger.FilterAttack' },
+  attackHit: { label: 'DOGMALITER.Trigger.attackHit', filter: 'DOGMALITER.Trigger.FilterAttack' },
   crit: { label: 'DOGMALITER.Trigger.crit', filter: 'DOGMALITER.Trigger.FilterAttack' },
   block: { label: 'DOGMALITER.Trigger.block', filter: 'DOGMALITER.Trigger.FilterActor' },
   dodge: { label: 'DOGMALITER.Trigger.dodge', filter: 'DOGMALITER.Trigger.FilterActor' },
+  skill: { label: 'DOGMALITER.Trigger.skill', filter: 'DOGMALITER.Trigger.FilterSkill' },
   combatStart: { label: 'DOGMALITER.Trigger.combatStart' },
   combatTurn: { label: 'DOGMALITER.Trigger.combatTurn', filter: 'DOGMALITER.Trigger.FilterActor' },
   combatEnd: { label: 'DOGMALITER.Trigger.combatEnd' },

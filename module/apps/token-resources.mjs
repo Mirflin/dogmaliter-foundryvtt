@@ -6,6 +6,11 @@
  *              on). The number field takes "12", or "-3" / "+5" (within 0 and
  *              the max, as the token HUD does it); - / + by 1, with Shift by
  *              5; the second field is the max.
+ *   skills     bottom left, above the charges: the actor's skills as
+ *              squares, two to a row, in a tall panel of a fixed height
+ *              (there even with no skills), scrolling when there are many; the name
+ *              on hover, the turns of cooldown on the square; a click uses it
+ *              (module/rules/skills.mjs).
  *   charges    bottom left, above the players list: Атака, Блок, Уворот
  *              (module/rules/charges.mjs) - those it has with a max. - / +
  *              by 1; reaching 0 starts their recovery, shown as "↻ 1 / 2"
@@ -19,6 +24,7 @@
  */
 
 import * as charges from '../rules/charges.mjs';
+import { check as checkSkill, useSkill } from '../rules/skills.mjs';
 
 const PANELS = {
   resources: {
@@ -28,9 +34,20 @@ const PANELS = {
     // Above the macro hotbar.
     place: (el) => document.getElementById('ui-bottom')?.insertBefore(el, document.getElementById('hotbar')),
   },
+  skills: {
+    id: 'dogmaliter-token-skills',
+    className: 'dogmaliter dl-token-resources dl-left-panel dl-token-skills',
+    template: 'systems/dogmaliter/templates/hud/token-skills.hbs',
+    // Bottom left, above the charges (or the players list without them).
+    place: (el) => {
+      const column = document.getElementById('ui-left-column-1');
+      const below = document.getElementById('dogmaliter-token-charges') ?? document.getElementById('players');
+      return column?.insertBefore(el, below);
+    },
+  },
   charges: {
     id: 'dogmaliter-token-charges',
-    className: 'dogmaliter dl-token-resources dl-token-charges',
+    className: 'dogmaliter dl-token-resources dl-left-panel dl-token-charges',
     template: 'systems/dogmaliter/templates/hud/token-charges.hbs',
     // Bottom left, above the players list.
     place: (el) => {
@@ -96,6 +113,16 @@ async function render() {
   const chargeList = actor ? charges.list(actor) : [];
   await draw(PANELS.resources, resources.length ? { ...base, resources } : null);
   await draw(PANELS.charges, chargeList.length ? { ...base, charges: chargeList, isGM: game.user.isGM } : null);
+  const skills = (actor?.items.contents ?? [])
+    .filter((item) => item.type === 'skill')
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((item) => {
+      const state = checkSkill(actor, item);
+      const cost = state.costs.map((c) => c.label).join(', ');
+      return { id: item.id, name: item.name, img: item.img, cooldown: state.cooldown, canUse: state.canUse, tooltip: cost ? `${item.name} — ${cost}` : item.name };
+    });
+  // Shown for any selected actor, with no skills too: the panel keeps its place and size.
+  await draw(PANELS.skills, actor ? { ...base, skills } : null);
 }
 
 /** Redraw soon - several changes often come at once. */
@@ -110,6 +137,15 @@ function actorOf(el) {
 async function onClick(event) {
   const actor = actorOf(event.target);
   if (!actor) return;
+
+  // A skill square: use it.
+  const skillButton = event.target.closest('[data-skill-id]');
+  if (skillButton) {
+    event.preventDefault();
+    const item = actor.items.get(skillButton.dataset.skillId);
+    if (item) await useSkill(actor, item);
+    return;
+  }
 
   // One recovery step for every recovering charge (GM).
   if (event.target.closest('[data-action="recover"]')) {
@@ -157,4 +193,12 @@ export function registerTokenResources() {
   Hooks.on('updateActor', (actor) => {
     if (actor.getActiveTokens?.().some((token) => token.controlled)) refresh();
   });
+  // The selected actor's skills changed (added, removed, cooldown).
+  for (const hook of ['createItem', 'updateItem', 'deleteItem']) {
+    Hooks.on(hook, (item) => {
+      if (item.parent?.getActiveTokens?.().some((token) => token.controlled)) refresh();
+    });
+  }
+  // Combat starting or ending changes what charges and cooldowns count.
+  for (const hook of ['updateCombat', 'deleteCombat', 'createCombatant', 'deleteCombatant']) Hooks.on(hook, () => refresh());
 }

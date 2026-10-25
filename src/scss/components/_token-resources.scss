@@ -146,13 +146,84 @@
 
 // The charges panel: bottom left, above the players list, wider than its
 // narrow column (the players list is too).
-&.dl-token-charges {
+// The left panels (skills, charges): pushed to the bottom of the column
+// together, one above the other.
+&.dl-left-panel {
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
   width: max-content;
   min-width: 210px;
   margin: auto 0 0;
+
+  & + .dl-left-panel {
+    margin-top: 6px;
+  }
+}
+
+// Skills: square pictures, two to a row, in a panel of a fixed height -
+// twelve rows, less on a short screen - scrolling past it.
+&.dl-token-skills {
+  min-width: 0;
+}
+
+.dl-ts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 48px);
+  gap: 6px;
+  align-content: start;
+  height: min(calc(12 * 48px + 11 * 6px), 50vh);
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-color: $r20-line transparent;
+  scrollbar-width: thin;
+}
+
+.dl-ts-skill {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 2px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-radius: 4px;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+    pointer-events: none;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: $r20-cyan;
+    box-shadow: 0 0 0 1px $r20-cyan;
+    outline: none;
+  }
+
+  &.is-blocked img {
+    filter: grayscale(1);
+    opacity: 0.45;
+  }
+}
+
+.dl-ts-cooldown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 3px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  text-shadow: 0 0 3px #000;
+  pointer-events: none;
 }
 
 .dl-tc-head {
@@ -250,4 +321,13 @@
   color: $r20-muted;
   font-size: 11px;
   white-space: nowrap;
+}
+
+.dl-ts-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: $r20-muted;
+  font-size: 11px;
+  font-style: italic;
+  text-align: center;
 }

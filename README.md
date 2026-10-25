@@ -106,15 +106,27 @@ The active GM's client creates a missing one, and brings an **unedited** one up 
 
 ## Charges: Атака, Блок, Уворот
 
-Ordinary attributes with a value and a max (new actors: 2 / 2; the list of new actors' attributes has them). An attack that hits spends an Атака charge (a miss does not), a block a Блок one, a dodge an Уворот one; with none left the action is refused.
+Ordinary attributes with a value and a max (new actors: 2 / 2; the list of new actors' attributes has them). **Charges are spent only while the character is in a started combat** - out of combat attacks, reactions and skills cost no charge. An attack that hits spends an Атака charge (a miss does not), a block a Блок one, a dodge an Уворот one; with none left the action is refused.
 
 Once a charge runs out (value 0), it recovers: **+1 at the start of each of the character's combat turns**, until it has been +1 as many times as its max - charges spent meanwhile do not stop it; if it ends with none left, it starts over. Stepping the tracker back is not a new turn. A charge that has not run out does not recover. An actor without the attribute, or without its max, has no limit. In code: `game.dogmaliter.charges` (`get`, `canSpend`, `spend`, `recover`).
+
+## Skills
+
+Items of type **skill**: name, **picture** (the GM picks it - the picture button in the form), description, **cost** (any of Health, Mana, AP, an Атака / Блок / Уворот charge, or an attribute by name - each with an amount), **requirements** (an attribute compared with a number: ≥, >, ≤, <, =, ≠), **tags**, a **cooldown** (turns), and an optional **roll**: a formula (`1d20`, `1d8`, `2d6 + @Strength` - attributes with Latin names), with **"Ask for a multiplier"** a window asks for one before the roll, as the attack does, and adds it.
+
+- **GM panel -> Skills**: make a skill (the form at the top; "Add a cost", "Add a requirement" - attribute names are suggested), and see the whole collection with a search (name, tag, description) and a tag filter. Each skill: **Give** (pick the actor - players' characters first, with their players' names), **Edit** (loads it into the form), **Delete**. A row **drags onto a character sheet**.
+- They are kept in the world compendium **"Навыки"** (`world.dogmaliter-skills`, created with the first skill); it can also be opened in the Compendium sidebar and dragged from there.
+- A character gets a copy; one they already have (same source or name) is not added twice. **Editing a skill in the compendium changes every copy characters have** (by its source; a copy with no source, by the skill's old name) - a running cooldown stays.
+- **Cooldown** works in combat only: a skill used by a character in a started combat can't be used again for that many of their turns (counted down at the start of each of their turns); the combat's end clears it. Out of combat skills have no cooldown - and charges in their cost are not spent.
+- **Character sheet -> Skills**: a search (name, tag, description) and a tag filter; each skill with its tags, roll, (red: not enough) and requirements (green met, red not, with the current value); **Use** checks them, asks for the multiplier if the skill says so (closing that window costs nothing), pays the cost, rolls (the roll is in the chat card, with dice sound / 3D dice), (charges through the charge rules: reaching 0 starts recovery), posts a chat card and fires the sound trigger "Skill used" (narrowed by the skill's name or a tag). Every payment is in the action log as "skill: <name>". The skill's own sheet shows the cost, requirements and tags (they are edited on the GM panel) and has the description editor.
+- In code: `game.dogmaliter.skills` (`pack`, `allSkills`, `check`, `useSkill`, `giveSkill`).
 
 ## Selected token's quick bars
 
 While you have a token selected that you own:
 
 - **above the macro hotbar** - its health, mana and AP (those switched on): -/+ change by 1 (Shift: 5), the number field takes `12` or `-3` / `+5` (within 0 and the max), the second field is the max;
+- **bottom left, above the charges** - its skills as square pictures, two to a row, in a tall panel of a fixed height (twelve rows, at most half the screen; there even with no skills), scrolling when there are many: the name (and cost) on hover, the turns of cooldown on the picture, greyed when it can't be used now; a click uses it;
 - **bottom left, above the players list** - its charges Атака, Блок, Уворот: -/+ by 1 (reaching 0 starts recovery), "↻ 1 / 2" while recovering (+1 so far / as many as the max). The GM also gets **↻ +1**: one recovery step, for a fight without the combat tracker.
 
 With several tokens selected they show the first and how many more there are.
@@ -130,6 +142,7 @@ The sliders button in the Token controls (GM only), or a key you assign under Co
 - **Players** - each player: their character (picking one there also makes them its owner - a player who owns no actor can change nothing, and the panel says so), online or not, which scene they are looking at (with "pull here" if it is another one), their character's resources, attributes and active effects. Then every other token on the scene, with a show/hide button. What the cards show each GM picks for themselves at the top of the page ("What to show"): which resource bars, and which attributes - every attribute name the list of new actors or any actor has, as switches. Until some are picked, the attributes with a max are shown. Values can be edited in place: `12` sets it, `-3` / `+5` changes it by that much (a resource stays within 0 and its max). Also the list of attributes new actors start with.
 - **Regions** - draw a new region (rectangle, ellipse, polygon: the buttons switch the map to that tool); every region of the scene: rename, recolour, show it on the map (selects it for editing), switch it off, configure, delete, see which tokens are inside. Each region's behaviors: add one of any type (anything but footsteps opens its configuration), switch on/off, configure, delete. Footsteps are set up right in the list: sound, volume, step interval, range.
 - **Sounds** - quick-sound buttons, sound bindings, footstep regions (below).
+- **Skills** - the skill collection: make, edit, search, give (see Skills).
 - **Log** - every change to attributes, health / mana / AP and charges, newest first: when, whose, who made it, before -> after (+/- for numbers), and why when the system knows (a charge spent on an attack, recovery at a turn start or by the GM's button, changed by hand on the quick bars); plus lines the macros add ("miss - no charge spent"). Search, a filter by kind, "Clear". The last 500 entries are kept (the `actionLog` world setting, written by the active GM's client). Macros can add a line: `game.dogmaliter.actionLog.note(actor, 'текст')`.
 
 ## Sound bindings
@@ -176,6 +189,7 @@ A Region Behavior: draw a region, open its configuration -> **Behaviors** -> "+"
 | `module/rolls/system-macros.mjs` | the world's system macros: create, keep up to date while unedited, run, restore |
 | `module/rules/charges.mjs` | charges: spend, recover at the start of a turn |
 | `module/rules/action-log.mjs` | the action log; `templates/apps/gm-panel/log.hbs` |
+| `module/rules/skills.mjs` | skills: the compendium, check, use, give; `templates/apps/gm-panel/skills.hbs`, `templates/item/item-skill-sheet.hbs` |
 | `module/apps/token-resources.mjs` | the selected token's quick bars; `templates/hud/token-resources.hbs`, `templates/hud/token-charges.hbs` |
 | `module/apps/gm-panel.mjs` | the GM panel; `templates/apps/gm-panel/` |
 | `module/audio/triggers.mjs` | sound bindings and the events that fire them |

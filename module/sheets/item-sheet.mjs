@@ -2,6 +2,7 @@ import {
   onManageActiveEffect,
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
+import { cooldownLabel, costLabel, costs, requirementLabel, requirements, rollLabel } from '../rules/skills.mjs';
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -70,6 +71,18 @@ export class DogmaLiterItemSheet extends ItemSheet {
 
     // Prepare active effects for easier access
     context.effects = prepareActiveEffectCategories(this.item.effects);
+
+    // A skill: its cost, requirements and tags, ready to show (they are made
+    // on the GM panel's Skills page, not here).
+    if (this.item.type === 'skill') {
+      context.skill = {
+        costs: costs(this.item).map(costLabel),
+        requirements: requirements(this.item).map(requirementLabel),
+        roll: rollLabel(this.item),
+        cooldown: cooldownLabel(this.item),
+        tags: this.item.system.tags ?? [],
+      };
+    }
 
     return context;
   }

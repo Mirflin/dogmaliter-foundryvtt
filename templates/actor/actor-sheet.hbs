@@ -63,6 +63,7 @@
     <a class="item" data-tab="main">{{localize 'DOGMALITER.Sheet.TabMain'}}</a>
     <a class="item" data-tab="attributes">{{localize 'DOGMALITER.Sheet.TabAttributes'}}</a>
     <a class="item" data-tab="inventory">{{localize 'DOGMALITER.Sheet.TabInventory'}}</a>
+    <a class="item" data-tab="skills">{{localize 'DOGMALITER.Sheet.TabSkills'}}</a>
   </nav>
 
   <section class="sheet-body r20-body">
@@ -206,6 +207,66 @@
           </li>
         {{else}}
           <li class="r20-empty">{{localize 'DOGMALITER.Sheet.NoItems'}}</li>
+        {{/each}}
+      </ol>
+    </div>
+
+    {{!-- Skills: module/rules/skills.mjs --}}
+    <div class="tab r20-skills" data-group="primary" data-tab="skills">
+      {{#if skills.length}}
+        <div class="r20-skill-tools">
+          <input type="text" data-skill-search value="{{skillSearch}}" spellcheck="false"
+                 placeholder="{{localize 'DOGMALITER.Skills.Search'}}" aria-label="{{localize 'DOGMALITER.Skills.Search'}}"/>
+          <select data-skill-tag aria-label="{{localize 'DOGMALITER.Skills.Tags'}}">
+            <option value="">{{localize 'DOGMALITER.Skills.AllTags'}}</option>
+            {{#each skillTags as |t|}}<option value="{{t.tag}}" {{#if t.selected}}selected{{/if}}>{{t.tag}}</option>{{/each}}
+          </select>
+        </div>
+      {{/if}}
+      <ol class="r20-skill-list">
+        {{#each skills as |skill|}}
+          <li class="r20-skill {{#unless skill.canUse}}is-blocked{{/unless}}" data-item-id="{{skill.id}}"
+              data-search-text="{{skill.search}}" data-tags="{{skill.tagKey}}">
+            <div class="r20-skill-head">
+              <img class="r20-inv-img" src="{{skill.img}}" alt="" data-action="item-open"/>
+              <a class="r20-skill-name" data-action="item-open">{{skill.name}}</a>
+              <span class="r20-skill-tags">{{#each skill.tags as |tag|}}<span>{{tag}}</span>{{/each}}</span>
+              {{#if @root.editable}}
+                <button type="button" class="r20-button r20-button--small" data-action="skill-use"
+                        {{#unless skill.canUse}}disabled{{/unless}}>
+                  <i class="fas fa-bolt"></i> {{localize 'DOGMALITER.Skills.Use'}}
+                </button>
+                <button type="button" class="r20-icon-button" data-action="item-delete"
+                        title="{{localize 'DOGMALITER.Skills.Remove'}}"
+                        aria-label="{{localize 'DOGMALITER.Skills.Remove'}}"><i class="fas fa-trash"></i></button>
+              {{/if}}
+            </div>
+            {{#if (or skill.costs.length skill.requirements.length skill.roll skill.cooldownLabel)}}
+              <div class="r20-skill-meta">
+                {{#if skill.cooldown}}<span class="r20-chip is-bad"><i class="fas fa-hourglass-half"></i> {{localize 'DOGMALITER.Skills.CooldownLeft'}}: {{skill.cooldown}}</span>
+                {{else if skill.cooldownLabel}}<span class="r20-chip"><i class="fas fa-hourglass-half"></i> {{skill.cooldownLabel}}</span>{{/if}}
+                {{#if skill.roll}}<span class="r20-chip r20-chip--roll"><i class="fas fa-dice-d20"></i> {{skill.roll}}</span>{{/if}}
+                {{#if skill.costs.length}}
+                  <span class="r20-label">{{localize 'DOGMALITER.Skills.Cost'}}</span>
+                  {{#each skill.costs as |cost|}}<span class="r20-chip {{#unless cost.ok}}is-bad{{/unless}}">{{cost.label}}</span>{{/each}}
+                {{/if}}
+                {{#if skill.requirements.length}}
+                  <span class="r20-label">{{localize 'DOGMALITER.Skills.Requirements'}}</span>
+                  {{#each skill.requirements as |req|}}
+                    <span class="r20-chip {{#if req.met}}is-good{{else}}is-bad{{/if}}">{{req.label}}{{#unless req.met}} ({{#if (ne req.value null)}}{{req.value}}{{else}}—{{/if}}){{/unless}}</span>
+                  {{/each}}
+                {{/if}}
+              </div>
+            {{/if}}
+            {{#if skill.description}}
+              <details class="r20-skill-text">
+                <summary>{{localize 'DOGMALITER.Skills.Description'}}</summary>
+                <div>{{{skill.description}}}</div>
+              </details>
+            {{/if}}
+          </li>
+        {{else}}
+          <li class="r20-empty">{{localize 'DOGMALITER.Skills.NoneOnSheet'}}</li>
         {{/each}}
       </ol>
     </div>

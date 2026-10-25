@@ -12,5 +12,9 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/dogmaliter/templates/item/parts/item-effects.hbs',
     // GM panel partials
     'systems/dogmaliter/templates/apps/gm-panel/actor-card.hbs',
+    // The selected token's quick bars, drawn on the first selection
+    'systems/dogmaliter/templates/hud/token-resources.hbs',
+    'systems/dogmaliter/templates/hud/token-charges.hbs',
+    'systems/dogmaliter/templates/hud/token-skills.hbs',
   ]);
 };

@@ -2,8 +2,9 @@
  * Charges: Атака, Блок, Уворот (CONFIG.DOGMALITER.charges) - ordinary
  * attributes with a value and a max, that actions spend:
  *
- *   - an action spends one; with none left it is refused (the macros ask
- *     `canSpend` first);
+ *   - an action spends one, but only while the character is in a started
+ *     combat - out of combat actions are free; in combat, with none left the
+ *     action is refused (the macros ask `canSpend` first);
  *   - once they run out (value 0) recovery starts: +1 at the start of each of
  *     the character's combat turns, until it has been +1 as many times as the
  *     max - charges spent meanwhile do not stop it. If it ends with none left,
@@ -61,10 +62,20 @@ export function list(actor) {
     .filter((charge) => charge.limited);
 }
 
-/** May the actor spend one? (No limit without the attribute or its max.) */
+/**
+ * Is the actor in a combat that has started? Charges are spent, and skill
+ * cooldowns run (module/rules/skills.mjs), only then.
+ * @param {Actor} actor
+ */
+export function inCombat(actor) {
+  if (!actor) return false;
+  return game.combats.some((combat) => combat.started && combat.combatants.some((c) => c.actor?.uuid === actor.uuid));
+}
+
+/** May the actor spend one? (No limit out of combat, or without the attribute or its max.) */
 export function canSpend(actor, key) {
   const charge = get(actor, key);
-  return !charge.limited || charge.value > 0;
+  return !charge.limited || !inCombat(actor) || charge.value > 0;
 }
 
 /**
@@ -92,7 +103,7 @@ export async function setValue(actor, key, value, reason = game.i18n.localize('D
  */
 export async function spend(actor, key, reason = game.i18n.localize('DOGMALITER.Log.ReasonSpend')) {
   const charge = get(actor, key);
-  if (!charge.limited) return true;
+  if (!charge.limited || !inCombat(actor)) return true; // out of combat: free
   if (charge.value <= 0) return false;
   await setValue(actor, key, charge.value - 1, reason);
   return true;

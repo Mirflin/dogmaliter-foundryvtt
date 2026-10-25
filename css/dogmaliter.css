@@ -218,6 +218,7 @@
   /* Regions */
   /* A binding with neither a sound nor a macro */
   /* Log page */
+  /* Skills page */
   /* The stat check dialog */
 }
 .dogmaliter .item-form {
@@ -1031,6 +1032,117 @@
 .dogmaliter .r20-icon-button--send:focus-visible {
   border-color: #16a3a8;
   color: #16a3a8;
+}
+.dogmaliter .r20-skill-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dogmaliter .r20-skill {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-radius: 4px;
+}
+.dogmaliter .r20-skill.is-blocked {
+  border-left: 3px solid #e06b72;
+}
+.dogmaliter .r20-skill-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dogmaliter .r20-skill-head .r20-button {
+  margin: 0;
+}
+.dogmaliter .r20-skill-head .r20-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dogmaliter .r20-button--small {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.dogmaliter .r20-skill-name {
+  flex: 1 1 auto;
+  color: #dce4e8;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dogmaliter .r20-skill-name:hover {
+  color: #16a3a8;
+  text-shadow: none;
+}
+.dogmaliter .r20-skill-tags {
+  display: flex;
+  gap: 4px;
+}
+.dogmaliter .r20-skill-tags span {
+  padding: 1px 6px;
+  background: rgba(22, 163, 168, 0.2);
+  border-radius: 8px;
+  color: #16a3a8;
+  font-size: 10px;
+  font-weight: 700;
+}
+.dogmaliter .r20-skill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 6px;
+}
+.dogmaliter .r20-skill-meta .r20-label {
+  margin: 0 0 0 4px;
+}
+.dogmaliter .r20-chip {
+  padding: 1px 7px;
+  background: #2b3338;
+  border-radius: 8px;
+  font-size: 11px;
+}
+.dogmaliter .r20-chip.is-good {
+  color: #3fbf6f;
+}
+.dogmaliter .r20-chip.is-bad {
+  color: #e06b72;
+}
+.dogmaliter .r20-skill-text {
+  margin-top: 6px;
+  color: #dce4e8;
+  font-size: 13px;
+}
+.dogmaliter .r20-skill-text summary {
+  color: #8c9ba4;
+  font-size: 11px;
+  cursor: pointer;
+}
+.dogmaliter .r20-skill-tools {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.dogmaliter .r20-skill-tools input[type=text] {
+  flex: 1 1 auto;
+}
+.dogmaliter .r20-skill-tools select {
+  flex: 0 0 auto;
+  height: 32px;
+  padding: 0 8px;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-radius: 3px;
+  color: #dce4e8;
+}
+.dogmaliter .r20-skill-tools select option {
+  background: #23292d;
+}
+.dogmaliter .r20-skill[hidden] {
+  display: none;
+}
+.dogmaliter .r20-chip--roll {
+  color: #e3c56b;
 }
 .dogmaliter.dl-panel .window-content {
   display: flex;
@@ -1894,6 +2006,152 @@
   color: #8c9ba4;
   font-size: 11px;
 }
+.dogmaliter .dl-skill-form > summary {
+  margin: 0;
+  cursor: pointer;
+  list-style: none;
+}
+.dogmaliter .dl-skill-form[open] > summary {
+  margin-bottom: 10px;
+}
+.dogmaliter .dl-row--top {
+  align-items: flex-start;
+}
+.dogmaliter .dl-textarea {
+  min-height: 80px;
+  padding: 6px 8px;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-radius: 3px;
+  color: #dce4e8;
+  font-family: "Roboto", sans-serif;
+  font-size: 13px;
+  resize: vertical;
+}
+.dogmaliter .dl-textarea:focus {
+  border-color: #16a3a8;
+  outline: 2px solid rgba(22, 163, 168, 0.2);
+}
+.dogmaliter .dl-skill-block {
+  margin-top: 10px;
+  padding: 8px;
+  background: #1b1f22;
+  border: 1px solid #37424a;
+  border-radius: 4px;
+}
+.dogmaliter .dl-skill-block > .dl-label {
+  display: block;
+  margin-bottom: 6px;
+}
+.dogmaliter .dl-skill-block > .dl-button {
+  margin-top: 4px;
+}
+.dogmaliter .dl-skill-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.dogmaliter .dl-skill-line select,
+.dogmaliter .dl-skill-line input[type=text] {
+  flex: 1 1 auto;
+}
+.dogmaliter .dl-skill-number {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 30px;
+  padding: 2px 6px;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-radius: 3px;
+  color: #dce4e8;
+  text-align: center;
+}
+.dogmaliter .dl-skill-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dogmaliter .dl-skill {
+  cursor: grab;
+}
+.dogmaliter .dl-skill[hidden] {
+  display: none;
+}
+.dogmaliter .dl-skill.is-editing {
+  border-color: #16a3a8;
+}
+.dogmaliter .dl-drag {
+  cursor: grab;
+}
+.dogmaliter .dl-skill-img {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border: none;
+}
+.dogmaliter .dl-skill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.dogmaliter .dl-skill-chip {
+  padding: 1px 7px;
+  background: #2b3338;
+  border-radius: 8px;
+  color: #dce4e8;
+  font-size: 11px;
+}
+.dogmaliter .dl-skill-chip--cost {
+  color: #e3c56b;
+}
+.dogmaliter .dl-skill-excerpt {
+  margin-top: 6px;
+}
+.dogmaliter .dl-skill-img-pick {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 2px;
+  background: #1b1f22;
+  border: 1px dashed #37424a;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.dogmaliter .dl-skill-img-pick img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: none;
+}
+.dogmaliter .dl-skill-img-pick:hover, .dogmaliter .dl-skill-img-pick:focus-visible {
+  border-color: #16a3a8;
+  outline: none;
+  box-shadow: none;
+}
+.dogmaliter .dl-check {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  color: #dce4e8;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.dogmaliter .dl-check input {
+  margin: 0;
+  accent-color: #16a3a8;
+}
+.dogmaliter .dl-skill-line .dl-skill-op {
+  flex: 0 0 56px;
+  width: 56px;
+  text-align: center;
+}
+.dogmaliter .dl-skill-chip--roll {
+  color: #e3c56b;
+}
 .dogmaliter.dl-stat-roll-dialog .dl-stat-roll:has([name=isAttack]:not(:checked)) .dl-stat-roll-attack {
   opacity: 0.5;
   pointer-events: none;
@@ -2028,13 +2286,71 @@
   height: 100%;
   background: var(--dl-tr-color, #16a3a8);
 }
-.dogmaliter.dl-token-charges {
+.dogmaliter.dl-left-panel {
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
   width: max-content;
   min-width: 210px;
   margin: auto 0 0;
+}
+.dogmaliter.dl-left-panel + .dl-left-panel {
+  margin-top: 6px;
+}
+.dogmaliter.dl-token-skills {
+  min-width: 0;
+}
+.dogmaliter .dl-ts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 48px);
+  gap: 6px;
+  align-content: start;
+  height: min(642px, 50vh);
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-color: #37424a transparent;
+  scrollbar-width: thin;
+}
+.dogmaliter .dl-ts-skill {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 2px;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.dogmaliter .dl-ts-skill img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: none;
+  pointer-events: none;
+}
+.dogmaliter .dl-ts-skill:hover, .dogmaliter .dl-ts-skill:focus-visible {
+  border-color: #16a3a8;
+  box-shadow: 0 0 0 1px #16a3a8;
+  outline: none;
+}
+.dogmaliter .dl-ts-skill.is-blocked img {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+.dogmaliter .dl-ts-cooldown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 3px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  text-shadow: 0 0 3px #000;
+  pointer-events: none;
 }
 .dogmaliter .dl-tc-head {
   flex-direction: row;
@@ -2118,4 +2434,46 @@
   color: #8c9ba4;
   font-size: 11px;
   white-space: nowrap;
+}
+.dogmaliter .dl-ts-empty {
+  grid-column: 1/-1;
+  margin: 0;
+  color: #8c9ba4;
+  font-size: 11px;
+  font-style: italic;
+  text-align: center;
+}
+
+/* A skill's chat card and its item sheet's summary (module/rules/skills.mjs) */
+.dl-skill-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dl-skill-card h3 img {
+  width: 24px;
+  height: 24px;
+  border: none;
+}
+
+.dl-skill-card-tags span,
+.dl-skill-sheet .dl-skill-chip {
+  display: inline-block;
+  margin: 0 4px 2px 0;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.dl-skill-sheet .dl-skill-summary {
+  padding: 4px 8px;
+}
+.dl-skill-sheet .dl-skill-summary p {
+  margin: 4px 0;
+}
+
+.dl-skill-card-roll {
+  margin: 6px 0;
 }

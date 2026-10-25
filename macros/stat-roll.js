@@ -26,12 +26,13 @@
 //
 //  Каждая атака, которая не промахнулась, тратит заряд атрибута
 //  «Атака» (если у него есть максимум); промах заряд не тратит.
+//  Заряды тратятся только в бою (персонаж в начатом бою).
 //  Без зарядов атаковать нельзя: когда они кончились, они
 //  возвращаются по +1 в начале каждого хода персонажа в бою — столько
 //  раз, сколько максимум. Это делает система (game.dogmaliter.charges).
 //
 //  После броска срабатывают звуковые привязки (Панель мастера →
-//  Звуки): attack, attackMiss / attackNear / attackMid, statRoll,
+//  Звуки): attack, attackMiss / attackNear / attackMid, attackHit, statRoll,
 //  nat20, nat1, crit.
 // ================================================================
 
@@ -187,7 +188,8 @@ if (attack) {
   if (distance === 'miss') game.dogmaliter.actionLog.note(actor, `Атака (${attack.name.trim()}): промах — заряд не потрачен`);
   else await charges.spend(actor, 'attack', `атака: ${attack.name.trim()}`);
 }
-const chargesLeft = attack && distance !== 'miss' ? attackCharge.value - 1 : attackCharge.value;
+const chargesLeft = charges.get(actor, 'attack').value;
+const chargeNote = !attack ? '' : distance === 'miss' ? ' (промах — заряд не потрачен)' : !charges.inCombat(actor) ? ' (вне боя — заряд не тратится)' : '';
 
 // Сама характеристика.
 const statValue = Number(ability.value);
@@ -219,7 +221,7 @@ const attackLines = attack
     <p><strong>Атака:</strong> ${escape(attack.name)}</p>
     <p><strong>Мультипликатор атаки:</strong> ${choice.attackMultiplier}</p>
     <p><strong>Дистанция:</strong> <span style="${DISTANCE_COLOR[distance]}">${DISTANCE_TEXT[distance]}</span></p>
-    ${attackCharge.limited ? `<p><strong>Заряды атаки:</strong> ${chargesLeft} / ${attackCharge.max}${distance === 'miss' ? ' (промах — заряд не потрачен)' : ''}</p>` : ''}`
+    ${attackCharge.limited ? `<p><strong>Заряды атаки:</strong> ${chargesLeft} / ${attackCharge.max}${chargeNote}</p>` : ''}`
   : '';
 const critLine = isCrit ? `<p><strong>${escape(FENCING)}: </strong><strong style="color: green;">КРИТ</strong></p>` : '';
 
@@ -262,6 +264,7 @@ const fire = (trigger, values) => game.dogmaliter.fireTrigger(trigger, { values,
 if (attack) {
   await fire('attack', [attack.name]);
   await fire({ miss: 'attackMiss', near: 'attackNear', mid: 'attackMid' }[distance], [attack.name]);
+  if (distance !== 'miss') await fire('attackHit', [attack.name]); // попала, любая дистанция
 }
 await fire('statRoll', [ability.name]);
 if (die >= 20) await fire('nat20', [ability.name]);

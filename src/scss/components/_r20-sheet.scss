@@ -808,3 +808,139 @@ $r20-danger: #e06b72;
   border-color: $r20-cyan;
   color: $r20-cyan;
 }
+
+// Skills page.
+.r20-skill-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.r20-skill {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-radius: 4px;
+
+  &.is-blocked {
+    border-left: 3px solid $r20-danger;
+  }
+}
+
+.r20-skill-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .r20-button {
+    margin: 0;
+  }
+
+  .r20-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.r20-button--small {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.r20-skill-name {
+  flex: 1 1 auto;
+  color: $r20-text;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    color: $r20-cyan;
+    text-shadow: none;
+  }
+}
+
+.r20-skill-tags {
+  display: flex;
+  gap: 4px;
+
+  span {
+    padding: 1px 6px;
+    background: $r20-cyan-soft;
+    border-radius: 8px;
+    color: $r20-cyan;
+    font-size: 10px;
+    font-weight: 700;
+  }
+}
+
+.r20-skill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 6px;
+
+  .r20-label {
+    margin: 0 0 0 4px;
+  }
+}
+
+.r20-chip {
+  padding: 1px 7px;
+  background: $r20-panel-2;
+  border-radius: 8px;
+  font-size: 11px;
+
+  &.is-good {
+    color: #3fbf6f;
+  }
+
+  &.is-bad {
+    color: $r20-danger;
+  }
+}
+
+.r20-skill-text {
+  margin-top: 6px;
+  color: $r20-text;
+  font-size: 13px;
+
+  summary {
+    color: $r20-muted;
+    font-size: 11px;
+    cursor: pointer;
+  }
+}
+
+.r20-skill-tools {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 10px;
+
+  input[type='text'] {
+    flex: 1 1 auto;
+  }
+
+  select {
+    flex: 0 0 auto;
+    height: 32px;
+    padding: 0 8px;
+    background: $r20-panel;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+
+    option {
+      background: $r20-panel;
+    }
+  }
+}
+
+.r20-skill[hidden] {
+  display: none;
+}
+
+.r20-chip--roll {
+  color: #e3c56b;
+}
