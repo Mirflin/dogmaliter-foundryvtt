@@ -40,20 +40,23 @@
     <p class="dl-hint">{{localize 'DOGMALITER.Panel.AttributeEditHint'}}</p>
   </details>
 
-  {{!-- The stat check: a macro of this world the GM edits in Foundry (module/rolls/stat-roll.mjs). --}}
+  {{!-- The stat check and the reaction: macros of this world the GM edits in Foundry (module/rolls/system-macros.mjs). --}}
   <div class="dl-card">
     <h3 class="dl-card-title"><i class="fa-solid fa-dice-d20" inert></i> {{localize 'DOGMALITER.Panel.StatMacro'}}</h3>
     <p class="dl-hint">{{localize 'DOGMALITER.Panel.StatMacroHint'}}</p>
-    <div class="dl-row dl-row--wrap">
-      <button type="button" class="dl-button dl-button--small" data-action="statMacroOpen">
-        <i class="fa-solid fa-code" inert></i> {{#if statMacro}}{{localize 'DOGMALITER.Panel.StatMacroOpen'}}{{else}}{{localize 'DOGMALITER.Panel.StatMacroCreate'}}{{/if}}
-      </button>
-      {{#if statMacro}}
-        <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="statMacroReset">
-          <i class="fa-solid fa-rotate-left" inert></i> {{localize 'DOGMALITER.Panel.StatMacroReset'}}
+    {{#each systemMacros as |macro|}}
+      <div class="dl-row dl-row--wrap">
+        <span class="dl-grow">{{macro.name}}</span>
+        <button type="button" class="dl-button dl-button--small" data-action="systemMacroOpen" data-macro="{{macro.key}}">
+          <i class="fa-solid fa-code" inert></i> {{#if macro.exists}}{{localize 'DOGMALITER.Panel.StatMacroOpen'}}{{else}}{{localize 'DOGMALITER.Panel.StatMacroCreate'}}{{/if}}
         </button>
-      {{/if}}
-    </div>
+        {{#if macro.exists}}
+          <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="systemMacroReset" data-macro="{{macro.key}}">
+            <i class="fa-solid fa-rotate-left" inert></i> {{localize 'DOGMALITER.Panel.StatMacroReset'}}
+          </button>
+        {{/if}}
+      </div>
+    {{/each}}
   </div>
 
   {{!-- The attributes every new actor starts with (the defaultAttributes setting). --}}
@@ -117,6 +120,17 @@
           </button>
         {{/if}}
       </header>
+
+      {{!-- Their character: choosing one also makes them its owner, so they can change its values. --}}
+      <div class="dl-row">
+        <span class="dl-label">{{localize 'DOGMALITER.Panel.Character'}}</span>
+        <select class="dl-grow" data-change="playerCharacter" aria-label="{{localize 'DOGMALITER.Panel.Character'}}">
+          {{selectOptions @root.actorChoices selected=player.characterId blank=(localize 'DOGMALITER.Panel.NoCharacterChoice')}}
+        </select>
+      </div>
+      {{#if player.ownsNothing}}
+        <p class="dl-binding-warning"><i class="fa-solid fa-triangle-exclamation" inert></i> {{localize 'DOGMALITER.Panel.OwnsNothing'}}</p>
+      {{/if}}
 
       {{#if player.actor}}
         {{> "systems/dogmaliter/templates/apps/gm-panel/actor-card.hbs" card=player.actor}}

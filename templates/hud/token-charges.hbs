@@ -1,0 +1,23 @@
+{{!-- The selected token's charges, bottom left: module/apps/token-resources.mjs. --}}
+<header class="dl-tr-head dl-tc-head">
+  <span class="dl-tr-name">{{name}}{{#if others}} <span class="dl-tr-others">+{{others}}</span>{{/if}}</span>
+  {{#if isGM}}
+    <button type="button" class="dl-tc-recover" data-action="recover"
+            data-tooltip="{{localize 'DOGMALITER.Charges.RecoverHint'}}" aria-label="{{localize 'DOGMALITER.Charges.Recover'}}">
+      <i class="fa-solid fa-rotate" inert></i> +1
+    </button>
+  {{/if}}
+</header>
+{{#each charges as |charge|}}
+  <div class="dl-tc-row {{#unless charge.value}}is-empty{{/unless}}" data-charge="{{charge.key}}" style="--dl-tr-color: {{charge.color}}">
+    <i class="{{charge.icon}} dl-tc-icon" inert></i>
+    <span class="dl-tc-name">{{charge.name}}</span>
+    <button type="button" data-step="-1" aria-label="−1"><i class="fa-solid fa-minus" inert></i></button>
+    <span class="dl-tc-value">{{charge.value}} / {{charge.max}}</span>
+    <button type="button" data-step="1" aria-label="+1"><i class="fa-solid fa-plus" inert></i></button>
+    {{!-- Always there, empty when not recovering, so the columns line up. --}}
+    <span class="dl-tc-recovery" {{#if charge.recovering}}data-tooltip="{{localize 'DOGMALITER.Charges.RecoveringHint'}}"{{/if}}>
+      {{#if charge.recovering}}<i class="fa-solid fa-rotate" inert></i> {{charge.restored}} / {{charge.max}}{{/if}}
+    </span>
+  </div>
+{{/each}}

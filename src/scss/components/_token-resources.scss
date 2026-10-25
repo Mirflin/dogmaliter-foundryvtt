@@ -143,3 +143,111 @@
     background: var(--dl-tr-color, #{$r20-cyan});
   }
 }
+
+// The charges panel: bottom left, above the players list, wider than its
+// narrow column (the players list is too).
+&.dl-token-charges {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: max-content;
+  min-width: 210px;
+  margin: auto 0 0;
+}
+
+.dl-tc-head {
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: none;
+}
+
+.dl-tc-recover {
+  flex: 0 0 auto;
+  width: auto;
+  height: 22px;
+  margin: 0;
+  padding: 0 8px;
+  background: $r20-cyan-deep;
+  border: 1px solid $r20-cyan;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: $r20-cyan;
+    box-shadow: none;
+    outline: none;
+  }
+}
+
+.dl-tc-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-left: 3px solid var(--dl-tr-color, #{$r20-cyan});
+  border-radius: 4px;
+
+  &.is-empty {
+    border-color: $r20-danger;
+
+    .dl-tc-value {
+      color: $r20-danger;
+    }
+  }
+
+  button {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    background: $r20-panel-2;
+    border: 1px solid $r20-line;
+    border-radius: 3px;
+    color: $r20-text;
+    font-size: 9px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--dl-tr-color, #{$r20-cyan});
+      box-shadow: none;
+      outline: none;
+    }
+  }
+}
+
+.dl-tc-icon {
+  flex: 0 0 16px;
+  color: var(--dl-tr-color, #{$r20-cyan});
+  text-align: center;
+}
+
+.dl-tc-name {
+  flex: 1 1 auto;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dl-tc-value {
+  min-width: 38px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dl-tc-recovery {
+  min-width: 44px;
+  color: $r20-muted;
+  font-size: 11px;
+  white-space: nowrap;
+}

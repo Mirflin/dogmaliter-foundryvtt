@@ -56,7 +56,8 @@
       "ShowAll": "Everyone"
     },
     "StatRoll": {
-      "Button": "Roll"
+      "Button": "Roll",
+      "Reaction": "Reaction"
     },
     "Trigger": {
       "manual": "Panel button",
@@ -76,7 +77,9 @@
       "FilterAttribute": "Stat (empty: any)",
       "FilterAttack": "Attack type (empty: any)",
       "FilterActor": "Character (empty: any)",
-      "FilterName": "Event name"
+      "FilterName": "Event name",
+      "block": "Block (reaction)",
+      "dodge": "Dodge (reaction)"
     },
     "Audience": {
       "all": "Everyone hears",
@@ -176,8 +179,8 @@
       "SoundFile": "Sound file",
       "PickFile": "Pick a file",
       "Volume": "Volume",
-      "Macro": "Macro",
-      "NoMacro": "— no macro —",
+      "Macro": "Run a macro",
+      "NoMacro": "— run no macro —",
       "TestBinding": "Test",
       "NoBindings": "No bindings yet.",
       "AddBinding": "Add binding",
@@ -240,14 +243,18 @@
       "ViewAll": "All",
       "ViewNone": "None",
       "ViewAutoHint": "Until you pick some, the attributes with a max are shown. This choice is yours: another GM has their own.",
-      "StatMacro": "Stat check",
-      "StatMacroHint": "The sheet's \"Roll\" button runs this world's \"Бросок характеристики\" macro. Edit it in Foundry's macro editor; players may run it but not change it.",
+      "StatMacro": "Roll macros",
+      "StatMacroHint": "The sheet's \"Roll\" and \"Reaction\" buttons run these macros of the world. Edit them in Foundry's macro editor; players may run them but not change them. An unedited macro is brought up to date with the system.",
       "StatMacroOpen": "Open the macro",
       "StatMacroCreate": "Create the macro",
       "StatMacroReset": "Restore the original",
-      "StatMacroResetConfirm": "Replace the text of the \"Бросок характеристики\" macro with the system's original? Your changes to it will be lost.",
-      "StatMacroResetDone": "The stat check macro has been restored.",
-      "BindingEmpty": "This binding has neither a sound nor a macro: it does nothing."
+      "StatMacroResetConfirm": "Replace the text of the \"{name}\" macro with the system's original? Your changes to it will be lost.",
+      "StatMacroResetDone": "Macro \"{name}\" restored.",
+      "BindingEmpty": "This binding has neither a sound nor a macro: it does nothing.",
+      "TabLog": "Log",
+      "Character": "Character",
+      "NoCharacterChoice": "— none —",
+      "OwnsNothing": "This player owns no actor: they can change nothing. Pick a character for them above: they become its owner."
     },
     "Resource": {
       "health": "Health",
@@ -257,6 +264,48 @@
     "TokenResources": {
       "Minus": "−1 (Shift: −5)",
       "Plus": "+1 (Shift: +5)"
+    },
+    "Macros": {
+      "Updated": "Macro \"{name}\" updated to the system's new version (you had not changed it)."
+    },
+    "Charges": {
+      "Recovered": "{name}: charges recovered +1 ({list}).",
+      "Recover": "Recover charges +1",
+      "RecoverHint": "One recovery step: +1 to every recovering charge (for a fight without the combat tracker)",
+      "RecoveringHint": "Recovering: +1 at the start of the character's turn; done / total",
+      "NothingToRecover": "No charge is recovering now."
+    },
+    "Log": {
+      "Search": "Search by character, player, attribute, reason",
+      "KindLabel": "What to show",
+      "Kind": {
+        "all": "Everything",
+        "charge": "Charges",
+        "attribute": "Attributes",
+        "resource": "Health / Mana / AP",
+        "note": "Notes"
+      },
+      "Clear": "Clear the log",
+      "ClearConfirm": "Delete every log entry? This cannot be undone.",
+      "Hint": "Every change to attributes, health / mana / AP and charges: who, whose, before → after and why. The last 500 entries are kept.",
+      "Empty": "No entries yet.",
+      "On": "on",
+      "Off": "off",
+      "ReasonSpend": "charge spent",
+      "ReasonManual": "changed by hand",
+      "ReasonRecoverTurn": "recovery: turn start",
+      "ReasonRecoverGm": "recovery: GM's button",
+      "Field": {
+        "value": "{from} → {to}",
+        "max": "max: {from} → {to}",
+        "name": "renamed: {from} → {to}",
+        "added": "added ({to})",
+        "removed": "removed (was {from})",
+        "enabled": "{to}",
+        "recoveryStart": "recovery started",
+        "recoveryEnd": "recovery finished",
+        "note": ""
+      }
     }
   },
   "TYPES": {

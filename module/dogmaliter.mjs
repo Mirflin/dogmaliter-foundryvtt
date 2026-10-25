@@ -14,7 +14,9 @@ import { registerEditorFonts } from './helpers/fonts.mjs';
 import { registerSettings } from './helpers/settings.mjs';
 import { migrateWorld } from './helpers/migration.mjs';
 // The stat check, sound bindings, footsteps, the GM panel.
-import { ensureStatRollMacro, rollStat } from './rolls/stat-roll.mjs';
+import { rollReaction, rollStat, syncSystemMacros } from './rolls/system-macros.mjs';
+import * as charges from './rules/charges.mjs';
+import * as actionLog from './rules/action-log.mjs';
 import { fireTrigger, registerTriggerHooks } from './audio/triggers.mjs';
 import { registerFootsteps } from './audio/footsteps.mjs';
 import { gmPanel, registerGmPanelControls, registerGmPanelHooks } from './apps/gm-panel.mjs';
@@ -31,6 +33,9 @@ Hooks.once('init', function () {
     DogmaLiterItem,
     rollItemMacro,
     rollStat,
+    rollReaction,
+    charges,
+    actionLog,
     fireTrigger,
     gmPanel,
   };
@@ -109,10 +114,13 @@ Hooks.once('ready', function () {
   Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
 
   registerTriggerHooks();
+  charges.registerCharges();
+  actionLog.registerActionLog();
   registerGmPanelHooks();
   migrateWorld();
-  // The editable stat check macro, made once per world.
-  if (game.users.activeGM?.isSelf) ensureStatRollMacro();
+  // The editable stat check and reaction macros: made once per world, kept
+  // up to date while unedited.
+  if (game.users.activeGM?.isSelf) syncSystemMacros();
 });
 
 /* -------------------------------------------- */

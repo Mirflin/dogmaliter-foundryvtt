@@ -11,7 +11,8 @@
  *                 `dogmaliter.sendItem` hook (see `_onItemSend`).
  *
  * The "Roll" button in the header opens the stat check
- * (module/rolls/stat-roll.mjs) for this actor.
+ * (macros/stat-roll.js), "Reaction" the block / dodge macro (macros/reaction.js),
+ * for this actor - see module/rolls/system-macros.mjs.
  *
  * Both images use Foundry's own `data-edit` mechanism: clicking one opens the
  * file picker, and the chosen path is written to the document path named in
@@ -165,6 +166,7 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
     html.on('click', '[data-action="item-send"]', this._onItemSend.bind(this));
     html.on('click', '[data-action="item-delete"]', this._onItemDelete.bind(this));
     html.on('click', '[data-action="stat-roll"]', this._onStatRoll.bind(this));
+    html.on('click', '[data-action="reaction-roll"]', this._onReactionRoll.bind(this));
 
     // A row that was just added gets the cursor in its name field. Done here,
     // after the re-render the new row caused, because before it the row is
@@ -242,7 +244,7 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
   }
 
   /**
-   * The stat check (module/rolls/stat-roll.mjs) for this actor. A token's
+   * The stat check (module/rolls/system-macros.mjs) for this actor. A token's
    * sheet speaks as that token; a character's sheet as its token on the
    * scene, if it has one.
    * @param {Event} event
@@ -250,6 +252,15 @@ export class DogmaLiterActorSheet extends BaseActorSheet {
   _onStatRoll(event) {
     event.preventDefault();
     game.dogmaliter.rollStat({ actor: this.actor, token: this.token?.object ?? null });
+  }
+
+  /**
+   * The reaction - block or dodge - for this actor, speaking as for the stat check.
+   * @param {Event} event
+   */
+  _onReactionRoll(event) {
+    event.preventDefault();
+    game.dogmaliter.rollReaction({ actor: this.actor, token: this.token?.object ?? null });
   }
 
   /* -------------------------------------------- */

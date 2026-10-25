@@ -1,43 +1,65 @@
 /**
- * While a token is selected, a small bar above the macro hotbar shows its
- * health, mana and AP (the ones switched on) and lets them be changed there:
+ * While a token is selected, two small bars let its numbers be changed right
+ * there:
  *
- *   - the number field: "12" sets it, "-3" / "+5" changes it by that much
- *     (within 0 and the max, as the token HUD does it);
- *   - the - / + buttons: by 1, with Shift by 5;
- *   - the max field: the max.
+ *   resources  above the macro hotbar: health, mana, AP (the ones switched
+ *              on). The number field takes "12", or "-3" / "+5" (within 0 and
+ *              the max, as the token HUD does it); - / + by 1, with Shift by
+ *              5; the second field is the max.
+ *   charges    bottom left, above the players list: Атака, Блок, Уворот
+ *              (module/rules/charges.mjs) - those it has with a max. - / +
+ *              by 1; reaching 0 starts their recovery, shown as "↻ 1 / 2"
+ *              (+1 so far / as many as the max). The GM also gets a button
+ *              for one recovery step (a fight without the combat tracker).
  *
  * Only for a token the user owns (a player: their own; the GM: any). With
- * several selected, the first one; the bar says how many more there are.
- * It is redrawn when the selection or the actor changes - but not while a
- * field in it is being typed in: then when that field is left.
+ * several selected, the first one; the bars say how many more there are.
+ * They are redrawn when the selection or the actor changes - but not while a
+ * field in one is being typed in: then when that field is left.
  */
 
-const ID = 'dogmaliter-token-resources';
-const TEMPLATE = 'systems/dogmaliter/templates/hud/token-resources.hbs';
+import * as charges from '../rules/charges.mjs';
+
+const PANELS = {
+  resources: {
+    id: 'dogmaliter-token-resources',
+    className: 'dogmaliter dl-token-resources',
+    template: 'systems/dogmaliter/templates/hud/token-resources.hbs',
+    // Above the macro hotbar.
+    place: (el) => document.getElementById('ui-bottom')?.insertBefore(el, document.getElementById('hotbar')),
+  },
+  charges: {
+    id: 'dogmaliter-token-charges',
+    className: 'dogmaliter dl-token-resources dl-token-charges',
+    template: 'systems/dogmaliter/templates/hud/token-charges.hbs',
+    // Bottom left, above the players list.
+    place: (el) => {
+      const column = document.getElementById('ui-left-column-1');
+      return column?.insertBefore(el, document.getElementById('players'));
+    },
+  },
+};
 
 const renderTemplateImpl = foundry.applications?.handlebars?.renderTemplate ?? renderTemplate;
 
 /** A redraw came while a field was being typed in. */
 let pending = false;
 
-/** The first selected token the user owns that has resources to show, and how many are selected. */
+/** The first selected token the user owns, and how many more are selected. */
 function selection() {
   const controlled = canvas.ready ? canvas.tokens.controlled : [];
   const token = controlled.find((t) => t.actor?.isOwner) ?? null;
   return { token, others: Math.max(0, controlled.length - 1) };
 }
 
-/** The bar's element, created above the hotbar the first time. */
-function element() {
-  let el = document.getElementById(ID);
+/** A panel's element, created in its place the first time. */
+function element(panel) {
+  let el = document.getElementById(panel.id);
   if (el) return el;
-  const bottom = document.getElementById('ui-bottom');
-  if (!bottom) return null;
   el = document.createElement('section');
-  el.id = ID;
-  el.className = 'dogmaliter dl-token-resources';
-  bottom.insertBefore(el, document.getElementById('hotbar'));
+  el.id = panel.id;
+  el.className = panel.className;
+  if (!panel.place(el)) return null;
   el.addEventListener('click', onClick);
   el.addEventListener('change', onChange);
   el.addEventListener('focusout', () => {
@@ -48,11 +70,10 @@ function element() {
   return el;
 }
 
-async function render() {
-  const { token, others } = selection();
-  const resources = (token?.actor?.resourceList ?? []).filter((resource) => resource.enabled);
-  const el = document.getElementById(ID);
-  if (!token || !resources.length) {
+/** Draw one panel with `context`, or remove it when there is nothing to show. */
+async function draw(panel, context) {
+  const el = document.getElementById(panel.id);
+  if (!context) {
     el?.remove();
     return;
   }
@@ -60,44 +81,59 @@ async function render() {
     pending = true;
     return;
   }
-  const html = await renderTemplateImpl(TEMPLATE, {
-    name: token.document.name,
-    img: token.document.texture?.src,
-    others,
-    resources,
-  });
-  const target = element();
+  const html = await renderTemplateImpl(panel.template, context);
+  const target = element(panel);
   if (!target) return;
   target.innerHTML = html;
-  target.dataset.tokenId = token.id;
+  target.dataset.tokenId = context.tokenId;
+}
+
+async function render() {
+  const { token, others } = selection();
+  const actor = token?.actor;
+  const base = actor ? { tokenId: token.id, name: token.document.name, img: token.document.texture?.src, others } : null;
+  const resources = (actor?.resourceList ?? []).filter((resource) => resource.enabled);
+  const chargeList = actor ? charges.list(actor) : [];
+  await draw(PANELS.resources, resources.length ? { ...base, resources } : null);
+  await draw(PANELS.charges, chargeList.length ? { ...base, charges: chargeList, isGM: game.user.isGM } : null);
 }
 
 /** Redraw soon - several changes often come at once. */
 export const refresh = foundry.utils.debounce(render, 50);
 
-/** The actor of the token the bar shows. */
-function currentActor() {
-  const id = document.getElementById(ID)?.dataset.tokenId;
+/** The actor of the token a panel shows. */
+function actorOf(el) {
+  const id = el.closest('[data-token-id]')?.dataset.tokenId;
   return canvas.tokens?.get(id)?.actor ?? null;
 }
 
-/** - / + : by 1, with Shift by 5. */
 async function onClick(event) {
+  const actor = actorOf(event.target);
+  if (!actor) return;
+
+  // One recovery step for every recovering charge (GM).
+  if (event.target.closest('[data-action="recover"]')) {
+    event.preventDefault();
+    const recovered = await charges.recover(actor);
+    if (!recovered.length) ui.notifications.info(game.i18n.localize('DOGMALITER.Charges.NothingToRecover'));
+    return;
+  }
+
   const button = event.target.closest('[data-step]');
   if (!button) return;
   event.preventDefault();
+  const step = Number(button.dataset.step);
+  const chargeKey = button.closest('[data-charge]')?.dataset.charge;
+  if (chargeKey) return charges.setValue(actor, chargeKey, charges.get(actor, chargeKey).value + step);
   const key = button.closest('[data-resource]')?.dataset.resource;
-  const actor = currentActor();
-  if (!key || !actor) return;
-  const step = Number(button.dataset.step) * (event.shiftKey ? 5 : 1);
-  await actor.modifyTokenAttribute(key, step, true, true);
+  if (key) await actor.modifyTokenAttribute(key, step * (event.shiftKey ? 5 : 1), true, true);
 }
 
-/** The value field ("12", "-3", "+5") or the max field. */
+/** A resource's value field ("12", "-3", "+5") or max field. */
 async function onChange(event) {
   const input = event.target;
   const key = input.closest('[data-resource]')?.dataset.resource;
-  const actor = currentActor();
+  const actor = actorOf(input);
   if (!key || !actor) return;
   const raw = input.value.trim().replace(/\s+/g, '');
   const number = Number(raw);
@@ -111,7 +147,9 @@ async function onChange(event) {
 export function registerTokenResources() {
   Hooks.on('controlToken', () => refresh());
   Hooks.on('canvasReady', () => refresh());
-  Hooks.on('canvasTearDown', () => document.getElementById(ID)?.remove());
+  Hooks.on('canvasTearDown', () => {
+    for (const panel of Object.values(PANELS)) document.getElementById(panel.id)?.remove();
+  });
   Hooks.on('deleteToken', () => refresh());
   Hooks.on('updateToken', (tokenDoc, changes) => {
     if ('delta' in changes || 'name' in changes || 'texture' in changes) refresh();

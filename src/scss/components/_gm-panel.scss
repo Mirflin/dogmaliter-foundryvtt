@@ -970,6 +970,77 @@
   font-size: 11px;
 }
 
+/* Log page */
+
+.dl-log {
+  padding: 4px 12px;
+  list-style: none;
+}
+
+.dl-log-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid $r20-line;
+  border-left: 3px solid transparent;
+  padding-left: 6px;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+
+  &--charge { border-left-color: #c8463f; }
+  &--resource { border-left-color: #3f7ccc; }
+  &--attribute { border-left-color: $r20-cyan; }
+  &--note { border-left-color: $r20-muted; }
+}
+
+.dl-log-time {
+  flex: 0 0 auto;
+  min-width: 64px;
+  color: $r20-muted;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dl-log-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  min-width: 0;
+}
+
+.dl-log-who {
+  font-size: 12px;
+}
+
+.dl-log-label {
+  font-weight: 700;
+}
+
+.dl-log-delta {
+  margin-left: 4px;
+  font-weight: 700;
+
+  &.is-up { color: #3fbf6f; }
+  &.is-down { color: $r20-danger; }
+}
+
+.dl-log-reason {
+  padding: 1px 6px;
+  background: $r20-panel-2;
+  border-radius: 8px;
+  color: $r20-muted;
+  font-size: 11px;
+}
+
 /* The stat check dialog */
 
 &.dl-stat-roll-dialog .dl-stat-roll {

@@ -24,6 +24,12 @@
 //  фехтованием без крита снижает шанс на 1 (не ниже 13). Любая другая
 //  атака возвращает шанс к 20.
 //
+//  Каждая атака, которая не промахнулась, тратит заряд атрибута
+//  «Атака» (если у него есть максимум); промах заряд не тратит.
+//  Без зарядов атаковать нельзя: когда они кончились, они
+//  возвращаются по +1 в начале каждого хода персонажа в бою — столько
+//  раз, сколько максимум. Это делает система (game.dogmaliter.charges).
+//
 //  После броска срабатывают звуковые привязки (Панель мастера →
 //  Звуки): attack, attackMiss / attackNear / attackMid, statRoll,
 //  nat20, nat1, crit.
@@ -33,10 +39,13 @@
 // ---------------- Настройки ----------------
 
 // Характеристики, которые идут в «Тип атаки», а не в список характеристик.
-const ATTACK_NAMES = ['Ударная сила', 'Фехтование', 'Владение', 'Меткость'];
+const ATTACK_NAMES = ['Ударная сила', 'Фехтование', 'Владение', 'Меткость', 'Рукопашный бой'];
 
 // Характеристики, которых нет в списке вовсе.
-const HIDDEN_NAMES = ['Заметность', 'Класс брони', 'Очки движения', 'Время путешествия', 'Регенерация', 'Шанс крита'];
+const HIDDEN_NAMES = [
+  'Заметность', 'Класс брони', 'Очки движения', 'Время путешествия', 'Регенерация', 'Шанс крита',
+  'Атака', 'Блок', 'Уворот', // заряды
+];
 
 const FENCING = 'Фехтование';  // атака, которая может критовать
 const CRIT = 'Шанс крита';     // атрибут с порогом крита
@@ -66,6 +75,11 @@ if (!stats.length) {
   return null;
 }
 
+// Заряды атаки. Нет атрибута «Атака» с максимумом — атаки без ограничений.
+const charges = game.dogmaliter.charges;
+const attackCharge = charges.get(actor, 'attack');
+const canAttack = attacks.length > 0 && charges.canSpend(actor, 'attack');
+
 const escape = (text) => foundry.utils.escapeHTML(String(text ?? ''));
 const option = (a) => `<option value="${a.id}">${escape(a.name)} (${escape(a.value)})</option>`;
 
@@ -80,9 +94,11 @@ const choice = await foundry.applications.api.DialogV2.wait({
     <div class="dl-stat-roll">
       <div class="form-group">
         <label class="dl-stat-roll-check">
-          <input type="checkbox" name="isAttack" ${attacks.length ? '' : 'disabled'}> Атака
+          <input type="checkbox" name="isAttack" ${canAttack ? '' : 'disabled'}> Атака
+          ${attackCharge.limited ? `<span class="hint">(заряды ${attackCharge.value} / ${attackCharge.max})</span>` : ''}
         </label>
         ${attacks.length ? '' : '<p class="hint">У персонажа нет характеристик атаки.</p>'}
+        ${attacks.length && !canAttack ? '<p class="hint">Нет зарядов атаки — они восстанавливаются в начале хода.</p>' : ''}
       </div>
       <div class="form-group dl-stat-roll-attack">
         <label>Тип атаки</label>
@@ -143,6 +159,13 @@ if (choice.isAttack && !attack) {
 }
 
 
+// Без зарядов атаковать нельзя (проверка ещё раз: окно могло висеть долго).
+if (attack && !charges.canSpend(actor, 'attack')) {
+  ui.notifications.warn('Нет зарядов атаки — они восстанавливаются в начале хода.');
+  return null;
+}
+
+
 // ---------------- Бросок ----------------
 
 // Порог крита до броска. Если атрибута нет или в нём не число — 20.
@@ -159,7 +182,12 @@ if (attack) {
   if (distanceTotal >= DISTANCE_MID) distance = 'mid';
   else if (distanceTotal >= DISTANCE_NEAR) distance = 'near';
   else distance = 'miss';
+
+  // Заряд атаки: тратится, только если не промах.
+  if (distance === 'miss') game.dogmaliter.actionLog.note(actor, `Атака (${attack.name.trim()}): промах — заряд не потрачен`);
+  else await charges.spend(actor, 'attack', `атака: ${attack.name.trim()}`);
 }
+const chargesLeft = attack && distance !== 'miss' ? attackCharge.value - 1 : attackCharge.value;
 
 // Сама характеристика.
 const statValue = Number(ability.value);
@@ -190,7 +218,8 @@ const attackLines = attack
   ? `
     <p><strong>Атака:</strong> ${escape(attack.name)}</p>
     <p><strong>Мультипликатор атаки:</strong> ${choice.attackMultiplier}</p>
-    <p><strong>Дистанция:</strong> <span style="${DISTANCE_COLOR[distance]}">${DISTANCE_TEXT[distance]}</span></p>`
+    <p><strong>Дистанция:</strong> <span style="${DISTANCE_COLOR[distance]}">${DISTANCE_TEXT[distance]}</span></p>
+    ${attackCharge.limited ? `<p><strong>Заряды атаки:</strong> ${chargesLeft} / ${attackCharge.max}${distance === 'miss' ? ' (промах — заряд не потрачен)' : ''}</p>` : ''}`
   : '';
 const critLine = isCrit ? `<p><strong>${escape(FENCING)}: </strong><strong style="color: green;">КРИТ</strong></p>` : '';
 

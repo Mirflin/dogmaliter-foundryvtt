@@ -1,0 +1,40 @@
+{{!-- GM panel, Log page: module/apps/gm-panel.mjs, entries from
+      module/rules/action-log.mjs, newest first. The search field and the kind
+      select hide rows (data-search-text, data-kind) without a redraw. --}}
+<section class="dl-tab {{#if active}}active{{/if}}" data-tab="log">
+  <div class="dl-card">
+    <div class="dl-row dl-row--wrap">
+      <input type="text" class="dl-search dl-grow" data-search="log" value="{{search.log}}" spellcheck="false"
+             placeholder="{{localize 'DOGMALITER.Log.Search'}}" aria-label="{{localize 'DOGMALITER.Panel.Search'}}"/>
+      <select data-change="logKind" aria-label="{{localize 'DOGMALITER.Log.KindLabel'}}">
+        {{#each kinds as |k|}}<option value="{{k.kind}}" {{#if k.selected}}selected{{/if}}>{{localize k.label}}</option>{{/each}}
+      </select>
+      <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="logClear">
+        <i class="fa-solid fa-trash" inert></i> {{localize 'DOGMALITER.Log.Clear'}}
+      </button>
+    </div>
+    <p class="dl-hint">{{localize 'DOGMALITER.Log.Hint'}}</p>
+  </div>
+
+  <ol class="dl-card dl-list dl-log" data-search-list="log">
+    {{#each entries as |entry|}}
+      <li class="dl-log-row dl-log-row--{{entry.kind}}" data-kind="{{entry.kind}}" data-search-text="{{entry.search}}">
+        <span class="dl-log-time">{{entry.when}}</span>
+        <span class="dl-log-body">
+          <span class="dl-log-who"><strong>{{entry.actor}}</strong> <span class="dl-muted">· {{entry.user}}</span></span>
+          {{#if (eq entry.kind 'note')}}
+            <span class="dl-log-what">{{entry.reason}}</span>
+          {{else}}
+            <span class="dl-log-what">
+              <span class="dl-log-label">{{entry.label}}</span> {{entry.what}}
+              {{#if entry.delta}}<span class="dl-log-delta {{#if entry.up}}is-up{{else}}is-down{{/if}}">{{entry.delta}}</span>{{/if}}
+            </span>
+            {{#if entry.reason}}<span class="dl-log-reason">{{entry.reason}}</span>{{/if}}
+          {{/if}}
+        </span>
+      </li>
+    {{else}}
+      <li class="dl-empty">{{localize 'DOGMALITER.Log.Empty'}}</li>
+    {{/each}}
+  </ol>
+</section>

@@ -88,22 +88,36 @@ Worlds from before this had `system.power`: the GM's client moves it into `syste
 
 A new character or NPC starts with the attributes of a list the GM edits on the panel - out of the box: Сила, Ловкость, Интеллект, Выносливость, Заметность, the attack types, Класс брони, Очки движения, Время путешествия, Регенерация, Шанс крита (20) (Players -> "Attributes of new actors"). "Add the missing ones to everyone" gives every existing actor those it lacks, by name, without changing the ones it has. A copied or imported actor keeps its own attributes. The list the system starts with is in `CONFIG.DOGMALITER.defaultAttributes` (`module/helpers/config.mjs`).
 
-## Stat check
+## Stat check and reaction
 
-The "throw_stat" macro, as a **macro of the world the GM can edit in Foundry**: "Бросок характеристики" in the Macro Directory (the active GM's client creates it once, from `macros/stat-roll.js`). The **Roll** button in the actor sheet's header runs it for that actor; so does `game.dogmaliter.rollStat()`, and the macro itself on the hotbar (for the selected token, or your own character). Its text, comments and messages are in Russian.
+Two **macros of the world the GM can edit in Foundry**, in the Macro Directory, their text, comments and messages in Russian:
 
-- Pick a stat and its multiplier: `floor(((multiplier + d20) / 10) * stat)`.
-- Tick **Attack** for an attack: pick the attack type and the hit multiplier. A second d20 + the hit multiplier sets the distance: 13+ middle, 10+ near, below that a miss.
-- **Фехтование** crits when the stat d20 reaches the actor's **Шанс крита**: the result is doubled and the threshold goes back to 20. Every fencing attack that does not crit lowers it by 1, down to 13. Any other attack puts it back to 20.
-- The attack types, the attributes left out of the list (Заметность among them), the crit attribute and the numbers are constants at the top of the macro.
-- Players may run the macro (Limited permission), not change it.
-- GM panel -> Players -> "Stat check": open the macro, or put the system's original text back. A new version of the system never overwrites the world's macro. With no macro in the world (deleted), the original text runs as it is.
+- **"Бросок характеристики"** (`macros/stat-roll.js`) - the sheet's **Roll** button, `game.dogmaliter.rollStat()`:
+  - pick a stat and its multiplier: `floor(((multiplier + d20) / 10) * stat)`;
+  - tick **Attack** for an attack: the attack type (Ударная сила, Фехтование, Владение, Меткость, Рукопашный бой) and the hit multiplier; a second d20 + the hit multiplier sets the distance: 13+ middle, 10+ near, below that a miss. An attack that does not miss spends an **Атака** charge (below) - a miss spends none; with none left "Attack" is greyed out;
+  - **Фехтование** crits when the stat d20 reaches **Шанс крита**: the result doubles and the threshold goes back to 20; every fencing attack that does not crit lowers it by 1, down to 13; any other attack puts it back to 20.
+- **"Реакция (блок / уворот)"** (`macros/reaction.js`) - the sheet's **Reaction** button, `game.dogmaliter.rollReaction()`: pick block or dodge and a multiplier; block rolls `1d8 + multiplier`, dodge `1d7 + multiplier` (the dice are in `REACTIONS` at the top of the macro); spends a **Блок** or **Уворот** charge (one with none left can't be picked).
 
-A character with no attack attributes can still roll a stat; "Attack" is then greyed out.
+  From a macro of your own: `game.dogmaliter.rollReaction();` (the selected token, or your character), `game.dogmaliter.rollReaction({ reaction: 'block' })` or `{ reaction: 'dodge' }` to have it picked at once. Or drag the world's "Реакция (блок / уворот)" macro onto the hotbar.
 
-## Selected token's resources
+The lists of names (attack types, attributes left out of the stat list) and the numbers are constants at the top of each macro. Players may run them (Limited permission), not change them.
 
-While you have a token selected that you own, a small bar above the macro hotbar shows its health, mana and AP (those switched on): -/+ change by 1 (Shift: 5), the number field takes `12` or `-3` / `+5` (within 0 and the max), the second field is the max. With several tokens selected it shows the first and how many more there are.
+The active GM's client creates a missing one, and brings an **unedited** one up to date with the system's file when the system changes (the macro remembers a hash of the text it was given); an edited one stays as it is. GM panel -> Players -> "Roll macros": open each, or put the system's text back. With no macro in the world (deleted), the file's text runs as it is.
+
+## Charges: Атака, Блок, Уворот
+
+Ordinary attributes with a value and a max (new actors: 2 / 2; the list of new actors' attributes has them). An attack that hits spends an Атака charge (a miss does not), a block a Блок one, a dodge an Уворот one; with none left the action is refused.
+
+Once a charge runs out (value 0), it recovers: **+1 at the start of each of the character's combat turns**, until it has been +1 as many times as its max - charges spent meanwhile do not stop it; if it ends with none left, it starts over. Stepping the tracker back is not a new turn. A charge that has not run out does not recover. An actor without the attribute, or without its max, has no limit. In code: `game.dogmaliter.charges` (`get`, `canSpend`, `spend`, `recover`).
+
+## Selected token's quick bars
+
+While you have a token selected that you own:
+
+- **above the macro hotbar** - its health, mana and AP (those switched on): -/+ change by 1 (Shift: 5), the number field takes `12` or `-3` / `+5` (within 0 and the max), the second field is the max;
+- **bottom left, above the players list** - its charges Атака, Блок, Уворот: -/+ by 1 (reaching 0 starts recovery), "↻ 1 / 2" while recovering (+1 so far / as many as the max). The GM also gets **↻ +1**: one recovery step, for a fight without the combat tracker.
+
+With several tokens selected they show the first and how many more there are.
 
 ## GM panel
 
@@ -113,9 +127,10 @@ The sliders button in the Token controls (GM only), or a key you assign under Co
   - *Scenes* - every scene, with a search: view it or activate it.
   - *Controls* - the viewed scene: pause, pull every player here; global illumination, token vision, darkness (slider and Day / Dusk / Night), fog reset, weather.
   - *Lights*, *Doors*, *Sounds* - every light source, door and ambient sound of the scene, with a search by name or by the region it stands in, "show on map", and on/off (open / close / lock for doors) one by one or all at once. Doors have no names: they are numbered and labelled with the regions they are in. "Open all" leaves locked doors locked.
-- **Players** - each player: online or not, which scene they are looking at (with "pull here" if it is another one), their character's resources, attributes and active effects. Then every other token on the scene, with a show/hide button. What the cards show each GM picks for themselves at the top of the page ("What to show"): which resource bars, and which attributes - every attribute name the list of new actors or any actor has, as switches. Until some are picked, the attributes with a max are shown. Values can be edited in place: `12` sets it, `-3` / `+5` changes it by that much (a resource stays within 0 and its max). Also the list of attributes new actors start with.
+- **Players** - each player: their character (picking one there also makes them its owner - a player who owns no actor can change nothing, and the panel says so), online or not, which scene they are looking at (with "pull here" if it is another one), their character's resources, attributes and active effects. Then every other token on the scene, with a show/hide button. What the cards show each GM picks for themselves at the top of the page ("What to show"): which resource bars, and which attributes - every attribute name the list of new actors or any actor has, as switches. Until some are picked, the attributes with a max are shown. Values can be edited in place: `12` sets it, `-3` / `+5` changes it by that much (a resource stays within 0 and its max). Also the list of attributes new actors start with.
 - **Regions** - draw a new region (rectangle, ellipse, polygon: the buttons switch the map to that tool); every region of the scene: rename, recolour, show it on the map (selects it for editing), switch it off, configure, delete, see which tokens are inside. Each region's behaviors: add one of any type (anything but footsteps opens its configuration), switch on/off, configure, delete. Footsteps are set up right in the list: sound, volume, step interval, range.
 - **Sounds** - quick-sound buttons, sound bindings, footstep regions (below).
+- **Log** - every change to attributes, health / mana / AP and charges, newest first: when, whose, who made it, before -> after (+/- for numbers), and why when the system knows (a charge spent on an attack, recovery at a turn start or by the GM's button, changed by hand on the quick bars); plus lines the macros add ("miss - no charge spent"). Search, a filter by kind, "Clear". The last 500 entries are kept (the `actionLog` world setting, written by the active GM's client). Macros can add a line: `game.dogmaliter.actionLog.note(actor, 'текст')`.
 
 ## Sound bindings
 
@@ -126,11 +141,12 @@ On the panel's Sounds page: "when this happens, play this sound and/or run this 
 | Panel button - a button under "Quick sounds" | its name |
 | Stat check, Rolled a 20, Rolled a 1 | stat |
 | Attack, Attack: missed / near / middle distance, Crit | attack type |
+| Block, Dodge (the reaction macro) | character |
 | Combat starts, Combat ends | - |
 | Turn starts | character |
 | Custom event | its name |
 
-Leave the second field empty for "any". **Who hears**: everyone, only the one who triggered it, or only the GM. The macro gets `trigger`, `values`, `actor`, `token`, `data` (the roll's numbers) and `binding` as variables. If the player who triggered it may not run the macro, the GM's client runs it.
+Leave the second field empty for "any". **Who hears**: everyone, only the one who triggered it, or only the GM. The macro gets `trigger`, `values`, `actor`, `token`, `data` (the roll's numbers) and `binding` as variables. If the player who triggered it may not run the macro, the GM's client runs it. The stat check and reaction macros can't be bound (a roll inside a roll).
 
 Fire a custom event from any macro:
 
@@ -156,9 +172,11 @@ A Region Behavior: draw a region, open its configuration -> **Behaviors** -> "+"
 | `module/canvas/token.mjs` | the stacked resource bars above tokens |
 | `module/documents/token.mjs` | no HUD bar for a switched-off resource |
 | `module/helpers/migration.mjs` | one-time data changes (`power` -> `mana`; the new stats in the list of new actors' attributes) |
-| `macros/stat-roll.js` | the stat check macro's original text |
-| `module/rolls/stat-roll.mjs` | the world's stat check macro: create, run, restore |
-| `module/apps/token-resources.mjs` | the selected token's resources above the hotbar; `templates/hud/token-resources.hbs` |
+| `macros/stat-roll.js`, `macros/reaction.js` | the stat check and reaction macros' original texts |
+| `module/rolls/system-macros.mjs` | the world's system macros: create, keep up to date while unedited, run, restore |
+| `module/rules/charges.mjs` | charges: spend, recover at the start of a turn |
+| `module/rules/action-log.mjs` | the action log; `templates/apps/gm-panel/log.hbs` |
+| `module/apps/token-resources.mjs` | the selected token's quick bars; `templates/hud/token-resources.hbs`, `templates/hud/token-charges.hbs` |
 | `module/apps/gm-panel.mjs` | the GM panel; `templates/apps/gm-panel/` |
 | `module/audio/triggers.mjs` | sound bindings and the events that fire them |
 | `module/audio/footsteps.mjs` | the Footsteps region behavior |

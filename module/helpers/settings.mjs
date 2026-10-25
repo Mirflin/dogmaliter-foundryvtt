@@ -59,6 +59,16 @@ export function registerSettings() {
     default: '',
   });
 
+  // The action log: changes to attributes, resources, charges
+  // (module/rules/action-log.mjs). Written by the active GM's client.
+  game.settings.register(SYSTEM_ID, 'actionLog', {
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: [],
+    onChange: refreshPanel,
+  });
+
   // The GM's master switch for every footstep region.
   game.settings.register(SYSTEM_ID, 'footstepsEnabled', {
     scope: 'world',

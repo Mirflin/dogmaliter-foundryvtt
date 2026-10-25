@@ -20,6 +20,7 @@
  */
 
 import { SYSTEM_ID } from '../helpers/settings.mjs';
+import { isSystemMacro } from '../rolls/system-macros.mjs';
 
 const SOCKET = `system.${SYSTEM_ID}`;
 
@@ -109,6 +110,8 @@ export function playSound({ sound, volume = 0.8, audience = 'all' }) {
  */
 async function runMacro(uuid, { binding, trigger, values = [], actor = null, token = null, data = {} }) {
   const macro = await fromUuidImpl(uuid);
+  // The stat check or the reaction run from a binding would be a roll inside a roll.
+  if (isSystemMacro(macro)) return console.warn(`DogmaLiter | A sound binding may not run "${macro.name}".`);
   if (macro?.canExecute) return macro.execute({ binding, trigger, values, actor, token, data });
   if (!game.users.activeGM) return;
   game.socket.emit(SOCKET, {

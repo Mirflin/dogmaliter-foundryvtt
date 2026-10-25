@@ -24,9 +24,10 @@
  */
 
 import { SYSTEM_ID, panelView } from '../helpers/settings.mjs';
+import { clearLog, getLog } from '../rules/action-log.mjs';
 import { blankBinding, getBindings, runBinding, setBindings } from '../audio/triggers.mjs';
 import { FOOTSTEPS, footstepBehaviors } from '../audio/footsteps.mjs';
-import { ensureStatRollMacro, resetStatRollMacro, statRollMacro } from '../rolls/stat-roll.mjs';
+import { SYSTEM_MACROS, ensureSystemMacro, isSystemMacro, resetSystemMacro, systemMacro } from '../rolls/system-macros.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -39,6 +40,7 @@ const TABS = [
   { id: 'players', icon: 'fa-solid fa-users', label: 'DOGMALITER.Panel.TabPlayers' },
   { id: 'regions', icon: 'fa-solid fa-draw-polygon', label: 'DOGMALITER.Panel.TabRegions' },
   { id: 'sounds', icon: 'fa-solid fa-volume-high', label: 'DOGMALITER.Panel.TabSounds' },
+  { id: 'log', icon: 'fa-solid fa-list-ul', label: 'DOGMALITER.Panel.TabLog' },
 ];
 
 /** The Scene page's sub-pages. The ones with a list have a search field. */
@@ -175,6 +177,7 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       openSheet: DogmaLiterGmPanel.#onOpenSheet,
       panToken: DogmaLiterGmPanel.#onPanToken,
       tokenHidden: DogmaLiterGmPanel.#onTokenHidden,
+      logClear: DogmaLiterGmPanel.#onLogClear,
       footstepsEnabled: DogmaLiterGmPanel.#onFootstepsEnabled,
       footstepToggle: DogmaLiterGmPanel.#onFootstepToggle,
       footstepOpen: DogmaLiterGmPanel.#onFootstepOpen,
@@ -184,8 +187,8 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       bindingPick: DogmaLiterGmPanel.#onBindingPick,
       bindingTest: DogmaLiterGmPanel.#onBindingTest,
       viewAttributes: DogmaLiterGmPanel.#onViewAttributes,
-      statMacroOpen: DogmaLiterGmPanel.#onStatMacroOpen,
-      statMacroReset: DogmaLiterGmPanel.#onStatMacroReset,
+      systemMacroOpen: DogmaLiterGmPanel.#onSystemMacroOpen,
+      systemMacroReset: DogmaLiterGmPanel.#onSystemMacroReset,
       templateAdd: DogmaLiterGmPanel.#onTemplateAdd,
       templateDelete: DogmaLiterGmPanel.#onTemplateDelete,
       templateApply: DogmaLiterGmPanel.#onTemplateApply,
@@ -208,6 +211,7 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     scene: { template: `${TEMPLATES}/scene.hbs`, scrollable: [''] },
     players: { template: `${TEMPLATES}/players.hbs`, scrollable: [''] },
     regions: { template: `${TEMPLATES}/regions.hbs`, scrollable: [''] },
+    log: { template: `${TEMPLATES}/log.hbs`, scrollable: [''] },
     sounds: { template: `${TEMPLATES}/sounds.hbs`, scrollable: [''] },
   };
 
@@ -216,6 +220,9 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
 
   /** The Scene page's sub-page shown. */
   #sceneSection = 'controls';
+
+  /** The Log page's kind filter: '' (all), charge, attribute, resource, note. */
+  #logKind = '';
 
   /** What is typed in each sub-page's search field. */
   #search = {};
@@ -260,6 +267,9 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
         break;
       case 'players':
         Object.assign(context, this.#playersContext());
+        break;
+      case 'log':
+        Object.assign(context, this.#logContext());
         break;
       case 'regions':
         Object.assign(context, this.#regionsContext());
@@ -363,6 +373,9 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
         sceneName: game.scenes.get(user.viewedScene)?.name ?? '—',
         away: !!scene && user.active && user.viewedScene !== scene.id,
         actor: actor ? actorCard(actor, tokenDoc, view) : null,
+        characterId: actor?.id ?? '',
+        // Owns no actor at all: can change no values anywhere.
+        ownsNothing: !game.actors.some((a) => a.testUserPermission(user, 'OWNER')),
       };
     });
     const tokens = (scene?.tokens.contents ?? [])
@@ -382,10 +395,46 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       })),
       viewAuto: view.attributes === null,
       defaultAttributes: game.settings.get(SYSTEM_ID, 'defaultAttributes'),
-      statMacro: statRollMacro()?.name ?? null,
+      systemMacros: Object.entries(SYSTEM_MACROS).map(([key, { name }]) => ({ key, name, exists: !!systemMacro(key) })),
       players,
+      actorChoices: Object.fromEntries(
+        game.actors.contents.sort((a, b) => a.name.localeCompare(b.name)).map((a) => [a.id, a.name])
+      ),
       online: users.filter((user) => user.active).length,
       tokens,
+    };
+  }
+
+  #logContext() {
+    const today = new Date().toDateString();
+    const entries = getLog()
+      .reverse()
+      .map((entry) => {
+        const date = new Date(entry.time);
+        const from = Number(entry.from);
+        const to = Number(entry.to);
+        const numeric = entry.field === 'value' && entry.from !== '' && entry.to !== '' && Number.isFinite(from) && Number.isFinite(to);
+        const delta = numeric ? to - from : 0;
+        return {
+          ...entry,
+          when: date.toDateString() === today ? date.toLocaleTimeString() : date.toLocaleString(),
+          what: game.i18n.format(`DOGMALITER.Log.Field.${entry.field}`, {
+            from: entry.from,
+            to: entry.field === 'enabled' ? game.i18n.localize(entry.to === 'true' ? 'DOGMALITER.Log.On' : 'DOGMALITER.Log.Off') : entry.to,
+          }),
+          delta: delta ? (delta > 0 ? `+${delta}` : `${delta}`) : '',
+          up: delta > 0,
+          search: [entry.actor, entry.user, entry.label, entry.reason].join(' '),
+        };
+      });
+    return {
+      entries,
+      search: this.#search,
+      kinds: ['', 'charge', 'attribute', 'resource', 'note'].map((kind) => ({
+        kind,
+        label: `DOGMALITER.Log.Kind.${kind || 'all'}`,
+        selected: kind === this.#logKind,
+      })),
     };
   }
 
@@ -401,8 +450,13 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
         empty: !binding.sound && !binding.macro,
       };
     });
+    // The system's own macros (the stat check, the reaction) are left out: a
+    // binding that ran one would open another roll in the middle of a roll.
     const macroChoices = Object.fromEntries(
-      game.macros.contents.sort((a, b) => a.name.localeCompare(b.name)).map((macro) => [macro.uuid, macro.name])
+      game.macros.contents
+        .filter((macro) => !isSystemMacro(macro))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((macro) => [macro.uuid, macro.name])
     );
     const footsteps = footstepBehaviors(this.scene).map((behavior) => ({
       uuid: behavior.uuid,
@@ -496,7 +550,9 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     for (const list of this.element.querySelectorAll('[data-search-list]')) {
       const wanted = (this.#search[list.dataset.searchList] ?? '').trim().toLowerCase();
       for (const row of list.querySelectorAll('[data-search-text]')) {
-        row.hidden = !!wanted && !row.dataset.searchText.toLowerCase().includes(wanted);
+        // The Log page also filters by kind.
+        const wrongKind = !!this.#logKind && 'kind' in row.dataset && row.dataset.kind !== this.#logKind;
+        row.hidden = wrongKind || (!!wanted && !row.dataset.searchText.toLowerCase().includes(wanted));
       }
     }
   }
@@ -514,6 +570,11 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
         return scene?.update({ 'environment.darknessLevel': Number(input.value) }, { animateDarkness: 1500 });
       case 'weather':
         return scene?.update({ weather: input.value });
+      case 'logKind':
+        this.#logKind = input.value;
+        return this.#applySearch();
+      case 'playerCharacter':
+        return this.#assignCharacter(input);
       case 'panelView':
         return this.#saveView();
       case 'attribute':
@@ -573,6 +634,21 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
       binding[field.name] = field.type === 'range' ? Number(field.value) : field.value;
     }
     await setBindings(bindings);
+  }
+
+  /**
+   * Give a player a character: it becomes their character, and they its
+   * owner - which is what lets them change its values. Clearing it leaves
+   * their ownership as it was.
+   */
+  async #assignCharacter(input) {
+    const user = game.users.get(input.closest('[data-user-id]')?.dataset.userId);
+    if (!user) return;
+    const actor = game.actors.get(input.value) ?? null;
+    if (actor && !actor.testUserPermission(user, 'OWNER')) {
+      await actor.update({ [`ownership.${user.id}`]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER });
+    }
+    await user.update({ character: actor?.id ?? null });
   }
 
   /** Write the ticked resources and attributes of the "what to show" picker to the setting. */
@@ -774,6 +850,15 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
     token?.update({ hidden: !token.hidden });
   }
 
+  /** Empty the action log, after asking. */
+  static async #onLogClear() {
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize('DOGMALITER.Log.Clear') },
+      content: `<p>${game.i18n.localize('DOGMALITER.Log.ClearConfirm')}</p>`,
+    });
+    if (confirmed) await clearLog();
+  }
+
   /* -------------------------------------------- */
   /*  Actions: sounds                             */
   /* -------------------------------------------- */
@@ -854,20 +939,23 @@ export class DogmaLiterGmPanel extends HandlebarsApplicationMixin(ApplicationV2)
   /*  Actions: the stat check macro               */
   /* -------------------------------------------- */
 
-  /** Open the stat check macro in Foundry's macro editor (creating it if the world has none). */
-  static async #onStatMacroOpen() {
-    (await ensureStatRollMacro())?.sheet.render(true);
+  /** Open a system macro (data-macro: its key) in Foundry's macro editor, creating it if the world has none. */
+  static async #onSystemMacroOpen(event, target) {
+    (await ensureSystemMacro(target.dataset.macro))?.sheet.render(true);
   }
 
-  /** Put the system's starting text back into the macro, after asking. */
-  static async #onStatMacroReset() {
+  /** Put the system's text back into a system macro, after asking. */
+  static async #onSystemMacroReset(event, target) {
+    const key = target.dataset.macro;
+    const name = SYSTEM_MACROS[key]?.name;
+    if (!name) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: game.i18n.localize('DOGMALITER.Panel.StatMacroReset') },
-      content: `<p>${game.i18n.localize('DOGMALITER.Panel.StatMacroResetConfirm')}</p>`,
+      content: `<p>${game.i18n.format('DOGMALITER.Panel.StatMacroResetConfirm', { name: foundry.utils.escapeHTML(name) })}</p>`,
     });
     if (!confirmed) return;
-    await resetStatRollMacro();
-    ui.notifications.info(game.i18n.localize('DOGMALITER.Panel.StatMacroResetDone'));
+    await resetSystemMacro(key);
+    ui.notifications.info(game.i18n.format('DOGMALITER.Panel.StatMacroResetDone', { name }));
   }
 
   /* -------------------------------------------- */

@@ -13,6 +13,20 @@ DOGMALITER.resources = {
 };
 
 /**
+ * Charges: attributes (with a max) that an action spends - the stat check's
+ * attack spends "Атака", the reaction macro "Блок" or "Уворот". With none
+ * left the action is refused. Once they run out they come back +1 at the
+ * start of each of the character's combat turns, as many times as the max
+ * (module/rules/charges.mjs). Keys are what code and flags use; `name` is
+ * the attribute's name on the sheet.
+ */
+DOGMALITER.charges = {
+  attack: { name: 'Атака', icon: 'fa-solid fa-hand-fist', color: '#c8463f' },
+  block: { name: 'Блок', icon: 'fa-solid fa-shield-halved', color: '#3f7ccc' },
+  dodge: { name: 'Уворот', icon: 'fa-solid fa-person-running', color: '#3fa96b' },
+};
+
+/**
  * The attributes a new actor starts with. Only the first value: the GM
  * changes the list on the GM panel (the `defaultAttributes` setting).
  */
@@ -26,11 +40,15 @@ DOGMALITER.defaultAttributes = [
   { name: 'Фехтование', value: '0', max: '' },
   { name: 'Владение', value: '0', max: '' },
   { name: 'Меткость', value: '0', max: '' },
+  { name: 'Рукопашный бой', value: '0', max: '' },
   { name: 'Класс брони', value: '0', max: '' },
   { name: 'Очки движения', value: '0', max: '' },
   { name: 'Время путешествия', value: '0', max: '' },
   { name: 'Регенерация', value: '0', max: '' },
   { name: 'Шанс крита', value: '20', max: '' },
+  { name: 'Атака', value: '2', max: '2' },
+  { name: 'Блок', value: '2', max: '2' },
+  { name: 'Уворот', value: '2', max: '2' },
 ];
 
 /**
@@ -48,6 +66,8 @@ DOGMALITER.triggers = {
   attackNear: { label: 'DOGMALITER.Trigger.attackNear', filter: 'DOGMALITER.Trigger.FilterAttack' },
   attackMid: { label: 'DOGMALITER.Trigger.attackMid', filter: 'DOGMALITER.Trigger.FilterAttack' },
   crit: { label: 'DOGMALITER.Trigger.crit', filter: 'DOGMALITER.Trigger.FilterAttack' },
+  block: { label: 'DOGMALITER.Trigger.block', filter: 'DOGMALITER.Trigger.FilterActor' },
+  dodge: { label: 'DOGMALITER.Trigger.dodge', filter: 'DOGMALITER.Trigger.FilterActor' },
   combatStart: { label: 'DOGMALITER.Trigger.combatStart' },
   combatTurn: { label: 'DOGMALITER.Trigger.combatTurn', filter: 'DOGMALITER.Trigger.FilterActor' },
   combatEnd: { label: 'DOGMALITER.Trigger.combatEnd' },
