@@ -1,0 +1,123 @@
+{{!-- One skill being made or edited: module/apps/skill-editor.mjs. The fields
+      carry data-draft (the path of their value in the draft). --}}
+<section class="dl-skill-editor-body">
+  <div class="dl-row">
+    <button type="button" class="dl-skill-img-pick" data-action="imgPick"
+            data-tooltip="{{localize 'DOGMALITER.Skills.PickImage'}}" aria-label="{{localize 'DOGMALITER.Skills.PickImage'}}">
+      <img src="{{draft.img}}" alt=""/>
+    </button>
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Name'}}</span>
+    <input type="text" class="dl-grow" data-draft="name" value="{{draft.name}}" spellcheck="false"
+           aria-label="{{localize 'DOGMALITER.Skills.Name'}}"/>
+  </div>
+  <div class="dl-row dl-row--top">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Description'}}</span>
+    <textarea class="dl-grow dl-textarea" data-draft="description" rows="4"
+              aria-label="{{localize 'DOGMALITER.Skills.Description'}}">{{draft.description}}</textarea>
+  </div>
+  <div class="dl-row">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Tags'}}</span>
+    <input type="text" class="dl-grow" data-draft="tags" value="{{draft.tags}}" spellcheck="false"
+           placeholder="{{localize 'DOGMALITER.Skills.TagsPlaceholder'}}" aria-label="{{localize 'DOGMALITER.Skills.Tags'}}"/>
+  </div>
+  <div class="dl-row">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Folder'}}</span>
+    <select class="dl-grow" data-draft="folder" aria-label="{{localize 'DOGMALITER.Skills.Folder'}}">
+      {{selectOptions folderChoices selected=draft.folder blank=(localize 'DOGMALITER.Skills.NoFolder')}}
+    </select>
+  </div>
+
+  <div class="dl-skill-block">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Roll'}}</span>
+    <div class="dl-skill-line">
+      <input type="text" class="dl-grow" data-draft="roll" value="{{draft.roll}}" spellcheck="false"
+             placeholder="{{localize 'DOGMALITER.Skills.RollPlaceholder'}}" aria-label="{{localize 'DOGMALITER.Skills.Roll'}}"/>
+      <label class="dl-check">
+        <input type="checkbox" data-draft="askMultiplier" {{checked draft.askMultiplier}}/>
+        {{localize 'DOGMALITER.Skills.AskMultiplier'}}
+      </label>
+    </div>
+    <p class="dl-hint">{{localize 'DOGMALITER.Skills.RollHint'}}</p>
+  </div>
+
+  <div class="dl-row">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Cooldown'}}</span>
+    <input type="number" class="dl-skill-number" min="0" step="1" data-draft="cooldown" value="{{draft.cooldown}}"
+           aria-label="{{localize 'DOGMALITER.Skills.Cooldown'}}"/>
+    <span class="dl-hint dl-grow">{{localize 'DOGMALITER.Skills.CooldownHint'}}</span>
+  </div>
+
+  <div class="dl-row">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Sound'}}</span>
+    <input type="text" class="dl-grow" data-draft="sound" value="{{draft.sound}}" spellcheck="false"
+           placeholder="{{localize 'DOGMALITER.Skills.SoundPlaceholder'}}" aria-label="{{localize 'DOGMALITER.Skills.Sound'}}"/>
+    <button type="button" class="dl-icon-button" data-action="soundPick"
+            data-tooltip="{{localize 'DOGMALITER.Skills.PickSound'}}" aria-label="{{localize 'DOGMALITER.Skills.PickSound'}}">
+      <i class="fa-solid fa-file-audio" inert></i>
+    </button>
+    <input type="range" class="dl-skill-volume" min="0" max="1" step="0.05" data-draft="soundVolume" value="{{draft.soundVolume}}"
+           data-tooltip="{{localize 'DOGMALITER.Skills.Volume'}}" aria-label="{{localize 'DOGMALITER.Skills.Volume'}}"/>
+    <button type="button" class="dl-icon-button" data-action="soundTest"
+            data-tooltip="{{localize 'DOGMALITER.Skills.TestSound'}}" aria-label="{{localize 'DOGMALITER.Skills.TestSound'}}">
+      <i class="fa-solid fa-play" inert></i>
+    </button>
+  </div>
+
+  <div class="dl-skill-block">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Cost'}}</span>
+    {{#each draft.cost as |cost|}}
+      <div class="dl-skill-line">
+        <select data-draft="cost.{{cost.index}}.key" aria-label="{{localize 'DOGMALITER.Skills.Cost'}}">
+          {{selectOptions @root.costChoices selected=cost.key localize=true}}
+        </select>
+        {{#if cost.isAttribute}}
+          <input type="text" list="dl-skill-attributes" data-draft="cost.{{cost.index}}.name" value="{{cost.name}}"
+                 placeholder="{{localize 'DOGMALITER.Skills.AttributeName'}}" aria-label="{{localize 'DOGMALITER.Skills.AttributeName'}}"/>
+        {{/if}}
+        <input type="number" class="dl-skill-number" min="0" step="1" data-draft="cost.{{cost.index}}.amount" value="{{cost.amount}}"
+               aria-label="{{localize 'DOGMALITER.Skills.Amount'}}"/>
+        <button type="button" class="dl-icon-button dl-icon-button--danger" data-action="rowRemove" data-list="cost" data-index="{{cost.index}}"
+                aria-label="{{localize 'DOGMALITER.Skills.RemoveRow'}}"><i class="fa-solid fa-xmark" inert></i></button>
+      </div>
+    {{else}}
+      <p class="dl-hint">{{localize 'DOGMALITER.Skills.Free'}}</p>
+    {{/each}}
+    <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="costAdd">
+      <i class="fa-solid fa-plus" inert></i> {{localize 'DOGMALITER.Skills.AddCost'}}
+    </button>
+  </div>
+
+  <div class="dl-skill-block">
+    <span class="dl-label">{{localize 'DOGMALITER.Skills.Requirements'}}</span>
+    {{#each draft.requirements as |req|}}
+      <div class="dl-skill-line">
+        <input type="text" class="dl-grow" list="dl-skill-attributes" data-draft="requirements.{{req.index}}.name" value="{{req.name}}"
+               placeholder="{{localize 'DOGMALITER.Skills.AttributeName'}}" aria-label="{{localize 'DOGMALITER.Skills.AttributeName'}}"/>
+        <select class="dl-skill-op" data-draft="requirements.{{req.index}}.op" aria-label="{{localize 'DOGMALITER.Skills.Op'}}">
+          {{selectOptions @root.opChoices selected=req.op}}
+        </select>
+        <input type="number" class="dl-skill-number" step="1" data-draft="requirements.{{req.index}}.min" value="{{req.min}}"
+               aria-label="{{localize 'DOGMALITER.Skills.Min'}}"/>
+        <button type="button" class="dl-icon-button dl-icon-button--danger" data-action="rowRemove" data-list="requirements" data-index="{{req.index}}"
+                aria-label="{{localize 'DOGMALITER.Skills.RemoveRow'}}"><i class="fa-solid fa-xmark" inert></i></button>
+      </div>
+    {{else}}
+      <p class="dl-hint">{{localize 'DOGMALITER.Skills.NoRequirements'}}</p>
+    {{/each}}
+    <button type="button" class="dl-button dl-button--small dl-button--quiet" data-action="reqAdd">
+      <i class="fa-solid fa-plus" inert></i> {{localize 'DOGMALITER.Skills.AddRequirement'}}
+    </button>
+  </div>
+
+  <datalist id="dl-skill-attributes">
+    {{#each attributeNames as |name|}}<option value="{{name}}"></option>{{/each}}
+  </datalist>
+
+  <div class="dl-row">
+    <button type="button" class="dl-button" data-action="save">
+      <i class="fa-solid fa-floppy-disk" inert></i>
+      {{#if draft.editing}}{{localize 'DOGMALITER.Skills.Save'}}{{else}}{{localize 'DOGMALITER.Skills.Create'}}{{/if}}
+    </button>
+    <button type="button" class="dl-button dl-button--quiet" data-action="cancel">{{localize 'DOGMALITER.Skills.Cancel'}}</button>
+  </div>
+</section>

@@ -21,6 +21,7 @@ import * as skills from './rules/skills.mjs';
 import { fireTrigger, registerTriggerHooks } from './audio/triggers.mjs';
 import { registerFootsteps } from './audio/footsteps.mjs';
 import { gmPanel, registerGmPanelControls, registerGmPanelHooks } from './apps/gm-panel.mjs';
+import { registerSkillLibrary, registerSkillLibraryHooks, skillLibrary } from './apps/skill-library.mjs';
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -40,6 +41,7 @@ Hooks.once('init', function () {
     skills,
     fireTrigger,
     gmPanel,
+    skillLibrary,
   };
 
   // Add custom constants for configuration.
@@ -51,6 +53,7 @@ Hooks.once('init', function () {
   registerSettings();
   registerFootsteps();
   registerGmPanelControls();
+  registerSkillLibrary();
 
   /**
    * Set an initiative formula for the system
@@ -120,6 +123,7 @@ Hooks.once('ready', function () {
   actionLog.registerActionLog();
   skills.registerSkills();
   registerGmPanelHooks();
+  registerSkillLibraryHooks();
   migrateWorld();
   // The editable stat check and reaction macros: made once per world, kept
   // up to date while unedited.

@@ -1,0 +1,20 @@
+{{!-- Skill library, top: search and filters (they hide cards, no redraw). --}}
+<header class="dl-sl-toolbar">
+  <div class="dl-sl-search">
+    <i class="fa-solid fa-magnifying-glass dl-muted" inert></i>
+    <input type="text" data-filter="search" value="{{filters.search}}" spellcheck="false"
+           placeholder="{{localize 'DOGMALITER.Skills.Search'}}" aria-label="{{localize 'DOGMALITER.Skills.Search'}}"/>
+  </div>
+  <select data-filter="tag" aria-label="{{localize 'DOGMALITER.Skills.Tags'}}">
+    <option value="">{{localize 'DOGMALITER.Skills.AllTags'}}</option>
+    {{#each tagChoices as |t|}}<option value="{{t.tag}}" {{#if t.selected}}selected{{/if}}>{{t.tag}}</option>{{/each}}
+  </select>
+  <select data-filter="cost" aria-label="{{localize 'DOGMALITER.Skills.Cost'}}">
+    <option value="">{{localize 'DOGMALITER.Skills.AnyCost'}}</option>
+    {{#each costChoices as |c|}}<option value="{{c.key}}" {{#if c.selected}}selected{{/if}}>{{localize c.label}}</option>{{/each}}
+  </select>
+  <button type="button" class="dl-icon-button" data-action="filtersReset"
+          data-tooltip="{{localize 'DOGMALITER.Skills.ResetFilters'}}" aria-label="{{localize 'DOGMALITER.Skills.ResetFilters'}}">
+    <i class="fa-solid fa-filter-circle-xmark" inert></i>
+  </button>
+</header>

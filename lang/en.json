@@ -258,8 +258,7 @@
       "TabLog": "Log",
       "Character": "Character",
       "NoCharacterChoice": "— none —",
-      "OwnsNothing": "This player owns no actor: they can change nothing. Pick a character for them above: they become its owner.",
-      "TabSkills": "Skills"
+      "OwnsNothing": "This player owns no actor: they can change nothing. Pick a character for them above: they become its owner."
     },
     "Resource": {
       "health": "Health",
@@ -335,7 +334,7 @@
       "Cancel": "Cancel",
       "NeedName": "Give the skill a name.",
       "Created": "Skill \"{name}\" created.",
-      "Saved": "Skill \"{name}\" saved. Characters who have it already keep their old copy.",
+      "Saved": "Skill \"{name}\" saved.",
       "Search": "Search by name, tag, description",
       "AllTags": "All tags",
       "ListHint": "Skills are kept in the world compendium \"Skills\". Drag a skill onto a character sheet, or press \"Give\".",
@@ -384,7 +383,22 @@
       "SoundPlaceholder": "Sound file - everyone hears it; empty for none",
       "PickSound": "Pick a sound",
       "TestSound": "Listen (only you)",
-      "Volume": "Volume"
+      "Volume": "Volume",
+      "LibraryTitle": "Skill library",
+      "LibraryOpen": "Open the skill library",
+      "CreateSkill": "Create skill",
+      "FolderCreate": "Create folder",
+      "FolderRename": "Rename folder",
+      "FolderDelete": "Delete folder",
+      "FolderDeleteConfirm": "Delete the folder <strong>{name}</strong>? Its skills are not deleted - they move to \"No folder\".",
+      "FolderName": "Folder name",
+      "FolderHint": "Drag a skill card onto a folder to move it there.",
+      "AllSkills": "All skills",
+      "NoFolder": "No folder",
+      "Folder": "Folder",
+      "AnyCost": "Any cost",
+      "ResetFilters": "Reset filters",
+      "NothingFound": "Nothing found."
     }
   },
   "TYPES": {

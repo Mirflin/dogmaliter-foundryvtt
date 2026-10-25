@@ -219,6 +219,9 @@
   /* A binding with neither a sound nor a macro */
   /* Log page */
   /* Skills page */
+  /* Skill library (module/apps/skill-library.mjs): folders on the left, the
+     filters on top, the cards under them. */
+  /* Skill editor (module/apps/skill-editor.mjs) */
   /* The stat check dialog */
 }
 .dogmaliter .item-form {
@@ -2155,6 +2158,201 @@
 .dogmaliter .dl-skill-volume {
   flex: 0 0 90px;
   width: 90px;
+}
+.dogmaliter.dl-skill-library .window-content {
+  display: grid;
+  grid-template-areas: "side top" "side main";
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: auto 1fr;
+}
+.dogmaliter .dl-sl-sidebar {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  padding: 12px;
+  background: #23292d;
+  border-right: 1px solid #37424a;
+}
+.dogmaliter .dl-sl-create {
+  justify-content: center;
+  width: 100%;
+}
+.dogmaliter .dl-sl-folders {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 8px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.dogmaliter .dl-sl-folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 2px;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-left: 3px solid var(--dl-folder-color, transparent);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.dogmaliter .dl-sl-folder .dl-icon-button {
+  width: 24px;
+  height: 24px;
+  visibility: hidden;
+}
+.dogmaliter .dl-sl-folder:hover {
+  background: #2b3338;
+}
+.dogmaliter .dl-sl-folder:hover .dl-icon-button {
+  visibility: visible;
+}
+.dogmaliter .dl-sl-folder.active {
+  background: rgba(22, 163, 168, 0.2);
+  border-color: #16a3a8;
+}
+.dogmaliter .dl-sl-folder.is-drop {
+  border: 1px dashed #16a3a8;
+  background: rgba(22, 163, 168, 0.2);
+}
+.dogmaliter .dl-sl-folder-icon {
+  flex: 0 0 18px;
+  color: #16a3a8;
+  text-align: center;
+}
+.dogmaliter .dl-sl-folder-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dogmaliter .dl-sl-toolbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #23292d;
+  border-bottom: 1px solid #37424a;
+}
+.dogmaliter .dl-sl-toolbar select {
+  flex: 0 0 auto;
+  max-width: 180px;
+}
+.dogmaliter .dl-sl-search {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 0 0 8px;
+  background: #1b1f22;
+  border: 1px solid #37424a;
+  border-radius: 3px;
+}
+.dogmaliter .dl-sl-search input[type=text] {
+  flex: 1 1 auto;
+  background: transparent;
+  border: none;
+}
+.dogmaliter .dl-sl-search input[type=text]:focus {
+  outline: none;
+}
+.dogmaliter .dl-sl-search:focus-within {
+  border-color: #16a3a8;
+}
+.dogmaliter .dl-sl-list {
+  grid-area: main;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+}
+.dogmaliter .dl-sl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dogmaliter .dl-sl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-radius: 6px;
+  cursor: grab;
+}
+.dogmaliter .dl-sl-card:hover {
+  border-color: #16a3a8;
+}
+.dogmaliter .dl-sl-card[hidden] {
+  display: none;
+}
+.dogmaliter .dl-sl-card .dl-skill-meta {
+  margin: 0;
+}
+.dogmaliter .dl-sl-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dogmaliter .dl-sl-card-img {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: #1b1f22;
+  border: 1px solid #37424a;
+  border-radius: 4px;
+}
+.dogmaliter .dl-sl-card-name {
+  color: #dce4e8;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dogmaliter .dl-sl-card-name:hover {
+  color: #16a3a8;
+  text-shadow: none;
+}
+.dogmaliter .dl-sl-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.dogmaliter .dl-sl-card-tags .dl-tag {
+  margin: 0;
+}
+.dogmaliter .dl-sl-card-text {
+  flex: 1 1 auto;
+  margin: 0;
+}
+.dogmaliter .dl-sl-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px solid #37424a;
+}
+.dogmaliter .dl-sl-card-actions .dl-button {
+  margin-right: auto;
+}
+.dogmaliter.dl-skill-editor .window-content {
+  display: block;
+  overflow-y: auto;
+}
+.dogmaliter .dl-skill-editor-body {
+  padding: 12px;
+}
+.dogmaliter .dl-skill-editor-body > .dl-row + .dl-row,
+.dogmaliter .dl-skill-editor-body > .dl-row + .dl-skill-block,
+.dogmaliter .dl-skill-editor-body > .dl-skill-block + .dl-row {
+  margin-top: 8px;
 }
 .dogmaliter.dl-stat-roll-dialog .dl-stat-roll:has([name=isAttack]:not(:checked)) .dl-stat-roll-attack {
   opacity: 0.5;

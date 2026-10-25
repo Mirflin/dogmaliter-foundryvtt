@@ -1223,6 +1223,244 @@
   width: 90px;
 }
 
+/* Skill library (module/apps/skill-library.mjs): folders on the left, the
+   filters on top, the cards under them. */
+
+&.dl-skill-library .window-content {
+  display: grid;
+  grid-template-areas:
+    'side top'
+    'side main';
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.dl-sl-sidebar {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  padding: 12px;
+  background: $r20-panel;
+  border-right: 1px solid $r20-line;
+}
+
+.dl-sl-create {
+  justify-content: center;
+  width: 100%;
+}
+
+.dl-sl-folders {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 8px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.dl-sl-folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 2px;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-left: 3px solid var(--dl-folder-color, transparent);
+  border-radius: 4px;
+  cursor: pointer;
+
+  .dl-icon-button {
+    width: 24px;
+    height: 24px;
+    visibility: hidden;
+  }
+
+  &:hover {
+    background: $r20-panel-2;
+
+    .dl-icon-button {
+      visibility: visible;
+    }
+  }
+
+  &.active {
+    background: $r20-cyan-soft;
+    border-color: $r20-cyan;
+  }
+
+  &.is-drop {
+    border: 1px dashed $r20-cyan;
+    background: $r20-cyan-soft;
+  }
+}
+
+.dl-sl-folder-icon {
+  flex: 0 0 18px;
+  color: $r20-cyan;
+  text-align: center;
+}
+
+.dl-sl-folder-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dl-sl-toolbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: $r20-panel;
+  border-bottom: 1px solid $r20-line;
+
+  select {
+    flex: 0 0 auto;
+    max-width: 180px;
+  }
+}
+
+.dl-sl-search {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 0 0 8px;
+  background: $r20-bg;
+  border: 1px solid $r20-line;
+  border-radius: 3px;
+
+  input[type='text'] {
+    flex: 1 1 auto;
+    background: transparent;
+    border: none;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:focus-within {
+    border-color: $r20-cyan;
+  }
+}
+
+.dl-sl-list {
+  grid-area: main;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.dl-sl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dl-sl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: $r20-panel;
+  border: 1px solid $r20-line;
+  border-radius: 6px;
+  cursor: grab;
+
+  &:hover {
+    border-color: $r20-cyan;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+
+  .dl-skill-meta {
+    margin: 0;
+  }
+}
+
+.dl-sl-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dl-sl-card-img {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: $r20-bg;
+  border: 1px solid $r20-line;
+  border-radius: 4px;
+}
+
+.dl-sl-card-name {
+  color: $r20-text;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    color: $r20-cyan;
+    text-shadow: none;
+  }
+}
+
+.dl-sl-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  .dl-tag {
+    margin: 0;
+  }
+}
+
+.dl-sl-card-text {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.dl-sl-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px solid $r20-line;
+
+  .dl-button {
+    margin-right: auto;
+  }
+}
+
+/* Skill editor (module/apps/skill-editor.mjs) */
+
+&.dl-skill-editor .window-content {
+  display: block;
+  overflow-y: auto;
+}
+
+.dl-skill-editor-body {
+  padding: 12px;
+
+  > .dl-row + .dl-row,
+  > .dl-row + .dl-skill-block,
+  > .dl-skill-block + .dl-row {
+    margin-top: 8px;
+  }
+}
+
 /* The stat check dialog */
 
 &.dl-stat-roll-dialog .dl-stat-roll {

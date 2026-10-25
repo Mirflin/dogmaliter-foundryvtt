@@ -1,0 +1,32 @@
+{{!-- Skill library, left column: module/apps/skill-library.mjs. A folder row is
+      a drop target for skill cards (data-folder-drop). --}}
+<aside class="dl-sl-sidebar">
+  <button type="button" class="dl-button dl-sl-create" data-action="create">
+    <i class="fa-solid fa-plus" inert></i> {{localize 'DOGMALITER.Skills.CreateSkill'}}
+  </button>
+  <button type="button" class="dl-button dl-button--quiet dl-sl-create" data-action="folderCreate">
+    <i class="fa-solid fa-folder-plus" inert></i> {{localize 'DOGMALITER.Skills.FolderCreate'}}
+  </button>
+
+  <ol class="dl-sl-folders">
+    {{#each folders as |folder|}}
+      <li class="dl-sl-folder {{#if folder.active}}active{{/if}}" data-action="folderPick" data-folder="{{folder.id}}"
+          data-folder-drop="{{#if folder.id}}{{folder.id}}{{else}}none{{/if}}" {{#if folder.color}}style="--dl-folder-color: {{folder.color}}"{{/if}}>
+        <i class="{{folder.icon}} dl-sl-folder-icon" inert></i>
+        <span class="dl-grow dl-sl-folder-name">{{folder.name}}</span>
+        <span class="dl-count">{{folder.count}}</span>
+        {{#unless folder.fixed}}
+          <button type="button" class="dl-icon-button" data-action="folderRename"
+                  data-tooltip="{{localize 'DOGMALITER.Skills.FolderRename'}}" aria-label="{{localize 'DOGMALITER.Skills.FolderRename'}}">
+            <i class="fa-solid fa-pen" inert></i>
+          </button>
+          <button type="button" class="dl-icon-button dl-icon-button--danger" data-action="folderDelete"
+                  data-tooltip="{{localize 'DOGMALITER.Skills.FolderDelete'}}" aria-label="{{localize 'DOGMALITER.Skills.FolderDelete'}}">
+            <i class="fa-solid fa-trash" inert></i>
+          </button>
+        {{/unless}}
+      </li>
+    {{/each}}
+  </ol>
+  <p class="dl-hint">{{localize 'DOGMALITER.Skills.FolderHint'}}</p>
+</aside>
